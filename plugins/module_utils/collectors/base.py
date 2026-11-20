@@ -9,7 +9,7 @@ Writing a new collector:
    argument-spec format; reuse ``connection_spec()`` for url/TLS/timeout).
 2. Implement ``collect()`` returning a list of ``make_record(...)`` dicts.
    Use ``self.client(...)`` for HTTP and ``self.warn(msg)`` for soft problems.
-3. Register it in ``collectors/__init__.py`` ``COLLECTORS``.
+3. Register it in ``collectors/registry.py`` ``COLLECTORS``.
 4. Add a thin module (copy ``plugins/modules/opnsense_info.py``) and a
    ``collect_<name>`` role (copy ``roles/collect_opnsense``).
 """

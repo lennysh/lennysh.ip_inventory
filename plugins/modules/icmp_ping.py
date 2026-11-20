@@ -94,6 +94,7 @@ def main():
     ping_bin = module.get_bin_path("ping", required=True)
     results = ping_many(
         module.params["targets"],
+        lambda argv: module.run_command(argv)[0],
         timeout_seconds=module.params["timeout"],
         concurrency=module.params["concurrency"],
         ping_command=ping_bin,

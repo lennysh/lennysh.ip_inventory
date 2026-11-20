@@ -161,6 +161,8 @@ groups:
 
 import os
 import re
+import shutil
+import subprocess
 from datetime import datetime, timezone
 
 from ansible.errors import AnsibleParserError
@@ -168,11 +170,24 @@ from ansible.module_utils.common.text.converters import to_native
 from ansible.plugins.inventory import BaseInventoryPlugin, Cacheable, Constructable
 
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.issues import findings_by_ip, summarize_findings
+from ansible_collections.lennysh.ip_inventory.plugins.module_utils.ping import ping_many
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.pipeline import PipelineError, run_pipeline
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.records import ACTIVE_RECORD_TYPES, ip_sort_key, meta
 
 _ENV_PATTERN = re.compile(r"\$\{([^}]+)\}")
 _UNSAFE_GROUP_CHARS = re.compile(r"[^A-Za-z0-9_]")
+
+
+def _run_quietly(argv):
+    """Run a command on the controller, discarding output; return its exit code."""
+    return subprocess.call(argv, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _controller_ping(ips, timeout_seconds=1.0, concurrency=50):
+    ping_bin = shutil.which("ping")
+    if not ping_bin:
+        raise PipelineError("ping is enabled but no 'ping' binary was found on the controller")
+    return ping_many(ips, _run_quietly, timeout_seconds=timeout_seconds, concurrency=concurrency, ping_command=ping_bin)
 
 
 def _expand_env(node):
@@ -252,7 +267,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
     def _collect(self):
         try:
-            result = run_pipeline(self._pipeline_config())
+            result = run_pipeline(self._pipeline_config(), ping_func=_controller_ping)
         except PipelineError as exc:
             raise AnsibleParserError("ip_inventory: %s" % to_native(exc))
         for warning in result["warnings"]:

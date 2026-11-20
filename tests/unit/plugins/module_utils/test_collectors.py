@@ -6,7 +6,7 @@ __metaclass__ = type
 
 import pytest
 
-from ansible_collections.lennysh.ip_inventory.plugins.module_utils.collectors import COLLECTORS, get_collector
+from ansible_collections.lennysh.ip_inventory.plugins.module_utils.collectors.registry import COLLECTORS, get_collector
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.api_client import ApiError
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.pipeline import validate_source_params
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.records import RECORD_KEYS

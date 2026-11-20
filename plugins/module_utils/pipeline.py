@@ -13,7 +13,7 @@ __metaclass__ = type
 
 from ansible.module_utils.common.arg_spec import ArgumentSpecValidator
 
-from ansible_collections.lennysh.ip_inventory.plugins.module_utils.collectors import get_collector
+from ansible_collections.lennysh.ip_inventory.plugins.module_utils.collectors.registry import get_collector
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.discover import (
     discovered_records,
     known_ips,
@@ -22,7 +22,7 @@ from ansible_collections.lennysh.ip_inventory.plugins.module_utils.discover impo
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.filters import RecordFilter
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.issues import analyze_issues
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.merge import reconcile, sort_records
-from ansible_collections.lennysh.ip_inventory.plugins.module_utils.ping import apply_ping_results, ping_many, pingable_ips
+from ansible_collections.lennysh.ip_inventory.plugins.module_utils.ping import apply_ping_results, pingable_ips
 from ansible_collections.lennysh.ip_inventory.plugins.module_utils.subnets import enrich_subnets
 
 # Keys allowed in a source config block that are not collector options.
@@ -95,11 +95,15 @@ def collect_sources(sources_cfg, global_filters=None, only=None, client_factory=
 def run_pipeline(config, client_factory=None, ping_func=None):
     """Run every step.  ``config`` mirrors the inventory plugin options.
 
+    ``ping_func(ips, timeout_seconds=..., concurrency=...)`` returns ``{ip: bool}``; it is required
+    when ping or the subnet sweep is enabled.
+
     Returns ``{hosts, subnets, orphan_vlans, findings, stats, warnings}``.
     """
     ping_cfg = dict(PING_DEFAULTS)
     ping_cfg.update(dict((k, v) for k, v in (config.get("ping") or {}).items() if v is not None))
-    ping_func = ping_func or ping_many
+    if (ping_cfg["enabled"] or ping_cfg["discover_unknown"]) and ping_func is None:
+        raise PipelineError("ping_func is required when ping or discover_unknown is enabled")
 
     records, stats, warnings = collect_sources(
         config.get("sources"),

@@ -10,7 +10,7 @@ __pycache__/
 # Local secrets / vars
 *.vault.yml
 .env
-collections/
+/collections/
 homelab/
 # antsibull-changelog cache
 changelogs/.plugin-cache.yaml

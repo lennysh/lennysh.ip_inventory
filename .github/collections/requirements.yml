@@ -1,0 +1,5 @@
+---
+# Collections needed by CI (end-to-end tests: e-mail delivery example).
+collections:
+  - name: community.general
+...

@@ -157,3 +157,21 @@ def test_analyze_issues_selection():
     assert "mac_shared" not in [f["category"] for f in analyze_issues(hosts, subnets, skip_checks=["mac_shared"])]
     with pytest.raises(ValueError, match="Unknown issue check"):
         analyze_issues(hosts, subnets, checks=["nope"])
+
+
+def test_ping_many_uses_supplied_runner():
+    from ansible_collections.lennysh.ip_inventory.plugins.module_utils.ping import ping_argv, ping_many
+
+    calls = []
+
+    def run(argv):
+        calls.append(argv)
+        if argv[-1] == "10.0.0.3":
+            raise OSError("boom")
+        return 0 if argv[-1] == "10.0.0.1" else 1
+
+    results = ping_many(["10.0.0.1", "10.0.0.2", "10.0.0.1", "10.0.0.3", ""], run, timeout_seconds=2, concurrency=2)
+    assert results == {"10.0.0.1": True, "10.0.0.2": False, "10.0.0.3": False}
+    assert len(calls) == 3                                   # duplicates and empty values skipped
+    assert ping_argv("10.0.0.9", 2.5, "/usr/bin/ping")[0] == "/usr/bin/ping"
+    assert ping_many([], run) == {}

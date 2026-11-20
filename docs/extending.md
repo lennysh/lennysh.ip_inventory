@@ -52,7 +52,7 @@ Say you want NetBox.
 
    Use `self.warn("...")` for soft problems. Raise `ApiError` (from `module_utils.api_client`) for hard failures.
 
-2. **Register it**: add the class to `COLLECTORS` in `plugins/module_utils/collectors/__init__.py`.
+2. **Register it**: add the class to `COLLECTORS` in `plugins/module_utils/collectors/registry.py`.
    The inventory plugin can now use `sources: {netbox: {...}}`.
 
 3. **Module**: copy `plugins/modules/opnsense_info.py` to `netbox_info.py`, swap the import and
