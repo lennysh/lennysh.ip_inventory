@@ -1,0 +1,9 @@
+---
+_ip_inventory_report_catalog:
+  inventory_json: {name: inventory_json, template: inventory.json.j2, basename: inventory, ext: json}
+  inventory_csv: {name: inventory_csv, template: inventory.csv.j2, basename: inventory, ext: csv, newline: "\r\n"}
+  inventory_txt: {name: inventory_txt, template: inventory.txt.j2, basename: inventory, ext: txt}
+  inventory_html: {name: inventory_html, template: inventory.html.j2, basename: inventory, ext: html}
+  subnets_csv: {name: subnets_csv, template: subnets.csv.j2, basename: subnets, ext: csv, requires: subnets, newline: "\r\n"}
+  issues_md: {name: issues_md, template: issues.md.j2, basename: issues, ext: md, requires: findings}
+  issues_csv: {name: issues_csv, template: issues.csv.j2, basename: issues, ext: csv, requires: findings, newline: "\r\n"}

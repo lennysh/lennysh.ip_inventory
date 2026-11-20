@@ -1,0 +1,17 @@
+---
+# Whole pipeline: collect, reconcile, ping, analyze, report.
+#
+#   ansible-playbook lennysh.ip_inventory.run -e @ip_inventory.yml
+#
+# Common overrides:
+#   -e '{"ip_inventory_sources": ["technitium"]}'   only some sources
+#   -e ip_inventory_ping_enabled=false               skip ping checks
+#   -e ip_inventory_discover_unknown=true            sweep subnets for unknown devices
+#   -e ip_inventory_raw=true                         every raw observation, unmerged
+#   -e ip_inventory_issues_enabled=false             skip the issue analysis
+#   -e ip_inventory_output_dir=/tmp/inv              report directory
+- name: Collect and reconcile IP inventory
+  hosts: "{{ ip_inventory_run_on | default('localhost') }}"
+  gather_facts: false
+  roles:
+    - role: lennysh.ip_inventory.run

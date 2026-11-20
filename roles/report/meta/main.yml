@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Lenny Shirley
+  description: Render IP inventory reports (JSON, CSV, text, HTML, Markdown) from Jinja2 templates
+  license: GPL-3.0-or-later
+  min_ansible_version: '2.16'
+  platforms:
+    - name: GenericLinux
+      versions:
+        - all
+  galaxy_tags:
+    - network
+    - inventory
+    - ipam
+    - reporting
+dependencies: []

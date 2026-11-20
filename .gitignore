@@ -1,0 +1,20 @@
+# Report output from running the playbooks in the repo
+output/
+# ansible-test / pytest
+tests/output/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Built collection artifacts
+*.tar.gz
+# Local secrets / vars
+*.vault.yml
+.env
+collections/
+homelab/
+# antsibull-changelog cache
+changelogs/.plugin-cache.yaml
+# tox-ansible
+.tox/
+# ansible-lint / ansible-compat working dir
+.ansible/

@@ -1,0 +1,41 @@
+---
+# Where report files are written (on the host running the play). Defaults to ./output
+# relative to where you run ansible-playbook. Delivering them (email, web server, ...) is up
+# to your playbook: the paths are published as ip_inventory_report_files.
+ip_inventory_output_dir: "{{ lookup('ansible.builtin.env', 'PWD') | default('.', true) }}/output"
+
+# Built-in reports to render. Available: inventory_json, inventory_csv, inventory_txt,
+# inventory_html, subnets_csv, issues_md, issues_csv
+ip_inventory_reports:
+  - inventory_json
+  - inventory_csv
+  - inventory_txt
+  - inventory_html
+  - subnets_csv
+  - issues_md
+  - issues_csv
+
+# Extra reports from your own templates. Each item:
+#   name:     identifier (shown in output)
+#   template: path to a .j2 file (absolute, or relative to the playbook's templates/ dir)
+#   basename: output file name without timestamp/extension
+#   ext:      file extension
+#   requires: optional; 'subnets' or 'findings' to skip the report when that data is empty
+# Templates can use every ip_inventory_* fact (hosts, subnets, findings, stats, ...).
+ip_inventory_report_custom: []
+
+# Append -YYYYmmdd-HHMMSS to file names (false = stable names, overwritten each run).
+ip_inventory_report_timestamped: true
+
+# Prefix CSV files with a UTF-8 BOM so Excel/LibreOffice detect the encoding.
+ip_inventory_csv_bom: true
+
+# Print the run summary (source stats, DNS summary, issues) at the end.
+ip_inventory_report_print_summary: true
+
+# Width of the hostname column in inventory_txt.
+ip_inventory_report_txt_hostname_width: 45
+
+# Publish a compact run summary with set_stats (shown as job artifacts in AAP and passed
+# to later workflow nodes as ip_inventory_summary).
+ip_inventory_report_set_stats: true

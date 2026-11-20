@@ -1,0 +1,29 @@
+---
+DOCUMENTATION:
+  name: csv_row
+  short_description: Render a list as a fully quoted CSV line
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Uses Python csv with QUOTE_ALL so commas, quotes and newlines stay inside one cell. None becomes an empty string.
+  options:
+    _input:
+      description: Field values.
+      type: list
+      required: true
+      elements: raw
+    delimiter:
+      description: Field delimiter.
+      type: str
+      required: false
+      default: ','
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      line: "{{ [host.ip, host.hostname] | lennysh.ip_inventory.csv_row }}"
+
+RETURN:
+  _value:
+    description: One CSV line without a trailing newline.
+    type: str

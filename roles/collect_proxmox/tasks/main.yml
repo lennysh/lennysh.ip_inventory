@@ -1,0 +1,20 @@
+---
+- name: Collect observations from Proxmox VE
+  lennysh.ip_inventory.proxmox_info:
+    url: "{{ ip_inventory_proxmox_url | default(omit, true) }}"
+    token_id: "{{ ip_inventory_proxmox_token_id | default(omit, true) }}"
+    token_secret: "{{ ip_inventory_proxmox_token_secret | default(omit, true) }}"
+    validate_certs: "{{ ip_inventory_proxmox_validate_certs }}"
+    timeout: "{{ ip_inventory_proxmox_timeout }}"
+    use_guest_agent: "{{ ip_inventory_proxmox_use_guest_agent }}"
+  register: _ip_inventory_proxmox_result
+  ignore_errors: "{{ ip_inventory_ignore_source_errors | default(false) }}"
+
+- name: Filter and add Proxmox VE observations
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.collect_common
+    tasks_from: add.yml
+  vars:
+    collect_common_source: proxmox
+    collect_common_result: "{{ _ip_inventory_proxmox_result }}"
+    collect_common_filters: "{{ ip_inventory_proxmox_filters }}"

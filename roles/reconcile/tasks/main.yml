@@ -1,0 +1,27 @@
+---
+- name: Merge observations into one row per IP
+  when: not ip_inventory_raw | bool
+  block:
+    - name: Reconcile observations
+      ansible.builtin.set_fact:
+        _ip_inventory_reconciled: "{{ ip_inventory_observations | default([]) | lennysh.ip_inventory.reconcile }}"
+
+    - name: Publish reconciled inventory
+      ansible.builtin.set_fact:
+        ip_inventory_hosts: "{{ _ip_inventory_reconciled.hosts }}"
+        ip_inventory_subnets: "{{ _ip_inventory_reconciled.subnets }}"
+        ip_inventory_orphan_vlans: "{{ _ip_inventory_reconciled.orphan_vlans }}"
+
+- name: Publish raw observations without merging
+  when: ip_inventory_raw | bool
+  ansible.builtin.set_fact:
+    ip_inventory_hosts: "{{ ip_inventory_observations | default([]) }}"
+    ip_inventory_subnets: "{{ ip_inventory_observations | default([]) | lennysh.ip_inventory.enrich_subnets }}"
+    ip_inventory_orphan_vlans: []
+
+- name: Report reconciled counts
+  ansible.builtin.debug:
+    msg: >-
+      {{ ip_inventory_observations | default([]) | length }} observations ->
+      {{ ip_inventory_hosts | length }} {{ 'raw rows' if ip_inventory_raw | bool else 'hosts' }},
+      {{ ip_inventory_subnets | length }} subnets, {{ ip_inventory_orphan_vlans | length }} VLAN-only definitions

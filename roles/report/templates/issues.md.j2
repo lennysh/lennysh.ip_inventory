@@ -1,0 +1,83 @@
+{#- Human-readable issues report grouped by severity. -#}
+{% set findings = ip_inventory_findings | default([]) %}
+{% set summary = findings | lennysh.ip_inventory.issue_summary %}
+{% set detail_categories = ['mac_conflict', 'mac_shared', 'hostname_shared', 'discovered', 'cname_aliases'] %}
+{% macro codes(items, limit, more='') -%}
+{% for i in items[:limit] %}`{{ i }}`{{ ', ' if not loop.last }}{% endfor %}{% if items | length > limit %} (+{{ items | length - limit }}{{ more }}){% endif %}
+{%- endmacro %}
+{% filter trim %}
+# Inventory issues
+
+Generated: `{{ ip_inventory_generated_at }}`
+Host rows analyzed: **{{ ip_inventory_hosts | selectattr('ip') | rejectattr('record_type', 'equalto', 'vlan') | list | length }}**
+Findings: **{{ findings | length }}**
+
+## Summary
+
+| Severity | Count |
+|----------|------:|
+{% for sev in summary.severities %}
+| {{ sev }} | {{ summary.by_severity[sev] | default(0) }} |
+{% endfor %}
+
+| Category | Count |
+|----------|------:|
+{% for cat, count in summary.by_category.items() %}
+| `{{ cat }}` | {{ count }} |
+{% endfor %}
+
+## What each check means
+
+| Category | Meaning |
+|----------|---------|
+{% for cat, meaning in summary.descriptions.items() %}
+| `{{ cat }}` | {{ meaning }} |
+{% endfor %}
+
+{% if not findings %}
+## Findings
+
+_No issues detected._
+{% endif %}
+{% for sev in summary.severities %}
+{% set group = findings | selectattr('severity', 'equalto', sev) | list %}
+{% if group %}
+
+## {{ sev | upper }} findings
+
+{% for f in group if f.category in detail_categories or sev == 'high' %}
+### `{{ f.category }}` — {{ f.summary }}
+
+{% if f.detail %}
+{{ f.detail }}
+
+{% endif %}
+{% if f.ips %}
+- **IPs:** {{ codes(f.ips, 1000) }}
+{% endif %}
+{% if f.macs %}
+- **MACs:** {{ codes(f.macs, 1000) }}
+{% endif %}
+{% if f.hostnames %}
+- **Hostnames:** {{ codes(f.hostnames, 12, ' more') }}
+{% endif %}
+{% if f.evidence %}
+- **Evidence:** {{ f.evidence }}
+{% endif %}
+
+{% endfor %}
+{% set bulk = group | rejectattr('category', 'in', detail_categories) | list if sev != 'high' else [] %}
+{% for cat in bulk | map(attribute='category') | unique | sort %}
+{% set items = bulk | selectattr('category', 'equalto', cat) | list %}
+### `{{ cat }}` ({{ items | length }})
+
+| Summary | IPs | Hostnames | Evidence |
+|---|---|---|---|
+{% for f in items %}
+| {{ f.summary | replace('|', '\\|') }} | {{ codes(f.ips, 6) }} | {{ codes(f.hostnames, 4) }} | {{ (f.evidence | default('')) | replace('|', '\\|') }} |
+{% endfor %}
+
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endfilter %}

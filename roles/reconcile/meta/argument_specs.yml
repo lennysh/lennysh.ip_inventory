@@ -1,0 +1,21 @@
+---
+argument_specs:
+  main:
+    short_description: Merge collected observations into one row per IP
+    version_added: 1.0.0
+    description:
+      - Reads C(ip_inventory_observations) (filled by the C(collect_*) roles), merges them by IP,
+        folds VLAN definitions into subnets and enriches every host with subnet/VLAN data.
+      - Sets C(ip_inventory_hosts), C(ip_inventory_subnets) and C(ip_inventory_orphan_vlans).
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_observations:
+        type: list
+        elements: dict
+        default: []
+        description: Filtered observation records.
+      ip_inventory_raw:
+        type: bool
+        default: false
+        description: Do not merge; publish every observation as its own row.

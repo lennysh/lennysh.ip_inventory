@@ -1,0 +1,71 @@
+---
+argument_specs:
+  main:
+    short_description: Render IP inventory reports from Jinja2 templates
+    version_added: 1.0.0
+    description:
+      - Renders the selected built-in reports and any custom templates into O(ip_inventory_output_dir)
+        and prints a run summary.
+      - Templates live in C(roles/report/templates/) and can use every C(ip_inventory_*) fact, so they are
+        easy to copy and customise via O(ip_inventory_report_custom).
+      - Sets C(ip_inventory_report_files), C(ip_inventory_generated_at) and C(ip_inventory_summary).
+      - Delivering the files (email, web server, object storage, ...) is left to your playbook;
+        use C(ip_inventory_report_files) after the role.
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_hosts:
+        type: list
+        elements: dict
+        required: true
+        description: Host rows to report.
+      ip_inventory_subnets:
+        type: list
+        elements: dict
+        default: []
+        description: Subnet records.
+      ip_inventory_orphan_vlans:
+        type: list
+        elements: dict
+        default: []
+        description: VLAN definitions without a subnet.
+      ip_inventory_findings:
+        type: list
+        elements: dict
+        default: []
+        description: Findings from the C(issues) role.
+      ip_inventory_output_dir:
+        type: path
+        default: "$PWD/output"
+        description: Output directory.
+      ip_inventory_reports:
+        type: list
+        elements: str
+        default: [inventory_json, inventory_csv, inventory_txt, inventory_html, subnets_csv, issues_md, issues_csv]
+        choices: [inventory_json, inventory_csv, inventory_txt, inventory_html, subnets_csv, issues_md, issues_csv]
+        description: Built-in reports to render.
+      ip_inventory_report_custom:
+        type: list
+        elements: dict
+        default: []
+        description: Extra reports (C(name), C(template), C(basename), C(ext), optional C(requires)).
+      ip_inventory_report_timestamped:
+        type: bool
+        default: true
+        description: Append a timestamp to file names.
+      ip_inventory_csv_bom:
+        type: bool
+        default: true
+        description: Write a UTF-8 BOM at the start of CSV files.
+      ip_inventory_report_print_summary:
+        type: bool
+        default: true
+        description: Print the run summary.
+      ip_inventory_report_txt_hostname_width:
+        type: int
+        default: 45
+        description: Hostname column width in the text report.
+      ip_inventory_report_set_stats:
+        type: bool
+        default: true
+        description: Publish a compact run summary (C(ip_inventory_summary)) with M(ansible.builtin.set_stats).

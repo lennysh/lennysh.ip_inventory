@@ -1,0 +1,4 @@
+{{ '﻿' if ip_inventory_csv_bom | bool else '' }}{{ ['severity', 'category', 'summary', 'detail', 'ips', 'macs', 'hostnames', 'evidence'] | lennysh.ip_inventory.csv_row }}
+{% for f in ip_inventory_findings | default([]) %}
+{{ [f.severity, f.category, f.summary, f.detail, f.ips | join('; '), f.macs | join('; '), f.hostnames | join('; '), f.evidence] | lennysh.ip_inventory.csv_row }}
+{% endfor %}

@@ -1,0 +1,21 @@
+---
+- name: Collect observations from Technitium DNS
+  lennysh.ip_inventory.technitium_info:
+    url: "{{ ip_inventory_technitium_url | default(omit, true) }}"
+    token: "{{ ip_inventory_technitium_token | default(omit, true) }}"
+    user: "{{ ip_inventory_technitium_user | default(omit, true) }}"
+    password: "{{ ip_inventory_technitium_password | default(omit, true) }}"
+    validate_certs: "{{ ip_inventory_technitium_validate_certs }}"
+    timeout: "{{ ip_inventory_technitium_timeout }}"
+    collect: "{{ ip_inventory_technitium_collect }}"
+  register: _ip_inventory_technitium_result
+  ignore_errors: "{{ ip_inventory_ignore_source_errors | default(false) }}"
+
+- name: Filter and add Technitium DNS observations
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.collect_common
+    tasks_from: add.yml
+  vars:
+    collect_common_source: technitium
+    collect_common_result: "{{ _ip_inventory_technitium_result }}"
+    collect_common_filters: "{{ ip_inventory_technitium_filters }}"

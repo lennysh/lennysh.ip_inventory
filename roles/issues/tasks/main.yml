@@ -1,0 +1,30 @@
+---
+- name: Analyze inventory for issues
+  ansible.builtin.set_fact:
+    ip_inventory_findings: "{{ _ip_inventory_findings }}"
+    ip_inventory_issue_summary: "{{ _ip_inventory_findings | lennysh.ip_inventory.issue_summary }}"
+  vars:
+    _ip_inventory_findings: >-
+      {{ (ip_inventory_hosts | lennysh.ip_inventory.analyze_issues(
+            ip_inventory_subnets | default([]),
+            checks=ip_inventory_issues_checks or none,
+            skip_checks=ip_inventory_issues_skip_checks,
+            cname_alias_threshold=ip_inventory_issues_cname_alias_threshold | int))
+         if (ip_inventory_issues_enabled | bool and not ip_inventory_raw | default(false) | bool) else [] }}
+
+- name: Report issue counts
+  ansible.builtin.debug:
+    msg: >-
+      {{ ip_inventory_issue_summary.total }} finding(s):
+      {% for sev, count in ip_inventory_issue_summary.by_severity.items() if count %}{{ sev }}={{ count }} {% endfor %}
+
+- name: Fail on configured severities
+  ansible.builtin.assert:
+    that: _ip_inventory_blocking | length == 0
+    fail_msg: >-
+      {{ _ip_inventory_blocking | length }} finding(s) with severity in {{ ip_inventory_issues_fail_on }}:
+      {{ _ip_inventory_blocking | map(attribute='summary') | join('; ') }}
+    quiet: true
+  vars:
+    _ip_inventory_blocking: "{{ ip_inventory_findings | selectattr('severity', 'in', ip_inventory_issues_fail_on) | list }}"
+  when: ip_inventory_issues_fail_on | length > 0

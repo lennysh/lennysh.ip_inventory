@@ -1,0 +1,41 @@
+---
+argument_specs:
+  main:
+    short_description: Run the whole IP inventory pipeline
+    version_added: 1.0.0
+    description:
+      - Runs the C(collect_<source>) role for each entry in O(ip_inventory_sources), then the
+        C(reconcile), C(reachability), C(issues) and C(report) roles.
+      - Every stage reads and writes C(ip_inventory_*) facts, so you can also call the roles individually
+        or insert your own tasks between them.
+      - Each role validates its own variables; see their argument specs for connection, ping, issue and report options.
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_sources:
+        type: list
+        elements: str
+        default: [opnsense, technitium, proxmox]
+        description:
+          - Sources to collect. Short names map to C(lennysh.ip_inventory.collect_<name>);
+            a fully-qualified role name is used as-is.
+      ip_inventory_filters:
+        type: dict
+        default: {}
+        description: Global include/exclude rules applied to every source.
+      ip_inventory_ignore_source_errors:
+        type: bool
+        default: false
+        description: Continue when a source fails.
+      ip_inventory_raw:
+        type: bool
+        default: false
+        description: Report raw observations without merging.
+      ip_inventory_reachability_enabled:
+        type: bool
+        default: true
+        description: Run the C(reachability) role (ping and optional sweep).
+      ip_inventory_report_enabled:
+        type: bool
+        default: true
+        description: Run the C(report) role.

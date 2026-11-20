@@ -1,0 +1,37 @@
+---
+# Inventory source ("Sourced from a Project") file. The name must end in ip_inventory.yml.
+# Secrets come from the "IP Inventory Sources" credential attached to the inventory source.
+plugin: lennysh.ip_inventory.ip_inventory
+
+sources:
+  opnsense:
+    url: https://opnsense.example.com
+    validate_certs: false
+    filters:
+      exclude_interfaces: [lo0, wan]
+  technitium:
+    url: https://technitium.example.com
+  proxmox:
+    url: https://proxmox.example.com:8006
+    validate_certs: false
+    filters:
+      exclude_name_patterns: ["*docker*", "*podman*"]
+  unifi:
+    url: https://unifi.example.com
+    validate_certs: false
+    collect:
+      known_clients: false
+
+filters:
+  include_networks: [192.168.*]
+  exclude_networks: [127.*, 172.17.*]
+
+ignore_source_errors: true
+hostname_strategy: short_hostname
+
+# Needs ICMP from the execution environment (see docs/aap.md, "Ping from job pods").
+ping: true
+discover_unknown: false
+
+# AAP keeps the imported inventory itself; a file cache inside a throwaway EE does nothing.
+cache: false

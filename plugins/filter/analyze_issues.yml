@@ -1,0 +1,46 @@
+---
+DOCUMENTATION:
+  name: analyze_issues
+  short_description: Find anomalies in the reconciled inventory
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Runs checks for MAC conflicts, shared MACs/hostnames, DNS-only records, unreachable hosts, missing MACs, unknown discoveries
+      and heavy CNAME use.
+  options:
+    _input:
+      description: Reconciled host records.
+      type: list
+      required: true
+      elements: dict
+    subnets:
+      description: Subnet records (used to recognise gateways).
+      type: list
+      required: false
+      elements: dict
+    checks:
+      description: Only run these checks.
+      type: list
+      required: false
+      elements: str
+    skip_checks:
+      description: Skip these checks.
+      type: list
+      required: false
+      elements: str
+    cname_alias_threshold:
+      description: Minimum aliases for a cname_aliases finding.
+      type: int
+      required: false
+      default: 10
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      findings: "{{ hosts | lennysh.ip_inventory.analyze_issues(subnets) }}"
+
+RETURN:
+  _value:
+    description: Findings with severity, category, summary, detail, ips, macs, hostnames, evidence.
+    type: list
+    elements: dict

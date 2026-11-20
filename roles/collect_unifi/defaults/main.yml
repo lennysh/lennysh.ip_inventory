@@ -1,0 +1,13 @@
+---
+# UniFi Network connection. Secrets should come from Ansible Vault (or the env vars noted in
+# meta/argument_specs.yml); empty values are omitted so the module's env fallbacks apply.
+ip_inventory_unifi_url: ""
+ip_inventory_unifi_api_key: ""
+ip_inventory_unifi_username: ""
+ip_inventory_unifi_password: ""
+ip_inventory_unifi_site: default
+ip_inventory_unifi_unifi_os: true
+ip_inventory_unifi_validate_certs: false
+ip_inventory_unifi_timeout: 30
+ip_inventory_unifi_collect: {}
+ip_inventory_unifi_filters: {}

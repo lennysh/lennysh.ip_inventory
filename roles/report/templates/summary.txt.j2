@@ -1,0 +1,43 @@
+{#- Rendered into the console at the end of the run (one list item per line). -#}
+{% set hosts = ip_inventory_hosts | default([]) %}
+{% set dns = hosts | lennysh.ip_inventory.dns_summary %}
+{% set issues = ip_inventory_findings | default([]) | lennysh.ip_inventory.issue_summary %}
+Sources:
+{% for name, s in (ip_inventory_source_stats | default({})).items() %}
+  {{ '%-12s' | format(name) }} collected={{ s.collected }} kept={{ s.kept }}{{ '  FAILED: ' ~ s.msg if s.failed else '' }}
+{% endfor %}
+{% for w in ip_inventory_warnings | default([]) %}
+  warning: {{ w }}
+{% endfor %}
+Inventory: {{ hosts | length }} rows, {{ hosts | selectattr('ping_status', 'equalto', 'up') | list | length }} up, {{ hosts | selectattr('ping_status', 'equalto', 'down') | list | length }} down, {{ (ip_inventory_discovered | default([])) | length }} discovered, {{ ip_inventory_subnets | default([]) | length }} subnets
+{% if dns.with_cname_aliases or dns.multiple_dns_names or dns.dns_only or dns.dns_ping_down %}
+DNS summary:
+  IPs with CNAME aliases: {{ dns.with_cname_aliases }}
+  IPs with multiple DNS names: {{ dns.multiple_dns_names }}
+  DNS-only rows (no DHCP/ARP/VM/UniFi): {{ dns.dns_only }}
+  DNS present + ping down (stale candidates): {{ dns.dns_ping_down }}
+{% for s in dns.dns_only_sample %}
+    dns-only {{ s.ip }}  {{ s.names | join(', ') }}
+{% endfor %}
+{% if dns.dns_only > dns.dns_only_sample | length %}
+    ... and {{ dns.dns_only - dns.dns_only_sample | length }} more
+{% endif %}
+{% for s in dns.dns_ping_down_sample %}
+    down     {{ s.ip }}  {{ s.names | join(', ') }}
+{% endfor %}
+{% endif %}
+{% if issues.total %}
+Issues: {{ issues.total }} finding(s) {% for sev in issues.severities if issues.by_severity[sev] %}{{ sev }}={{ issues.by_severity[sev] }} {% endfor %}
+
+{% for f in ip_inventory_findings | selectattr('severity', 'equalto', 'high') %}
+  * {{ f.summary }}
+{% endfor %}
+{% else %}
+Issues: none detected
+{% endif %}
+{% if ip_inventory_report_files | default([]) %}
+Wrote:
+{% for path in ip_inventory_report_files %}
+  {{ path }}
+{% endfor %}
+{% endif %}

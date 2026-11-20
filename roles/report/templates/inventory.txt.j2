@@ -1,0 +1,43 @@
+{#- Plain-text table of every host. -#}
+{% set hw = ip_inventory_report_txt_hostname_width | default(45) | int %}
+{% set fmt = '%-15s  %-' ~ hw ~ 's  %-22s  %-22s  %-28s  %-7s  %s' %}
+{% macro hostname_display(r) -%}
+{%- set m = r.metadata | default({}) -%}
+{%- set primary = r.hostname or '-' -%}
+{%- set aliases = m.cname_aliases | default([]) -%}
+{%- set extras = m.dns_names | default([]) | reject('equalto', r.hostname) | select | list -%}
+{%- if aliases -%}
+{{ primary }} (cname: {{ aliases[:2] | join(', ') }}{{ ' +%d more' | format(aliases | length - 2) if aliases | length > 2 else '' }})
+{%- elif extras | length > 1 -%}
+{{ primary }} (+{{ extras | length }} dns)
+{%- elif extras | length == 1 -%}
+{{ primary }} (/ {{ extras[0] }})
+{%- elif m.dns_only | default(false) -%}
+{{ primary }} (dns-only)
+{%- else -%}
+{{ primary }}
+{%- endif -%}
+{%- endmacro %}
+{% macro mac_display(r) -%}
+{%- set macs = (r.metadata | default({})).all_macs | default([]) -%}
+{%- if r.mac and macs | length > 1 -%}
+{{ r.mac }} ({{ macs | length }} seen)
+{%- else -%}
+{{ r.mac or (macs | join(', ') if macs else '-') }}
+{%- endif -%}
+{%- endmacro %}
+Network IP Inventory  (generated {{ ip_inventory_generated_at }}, {{ ip_inventory_hosts | length }} rows)
+
+{{ fmt | format('IP', 'Hostname', 'MAC', 'Sources', 'Types', 'Ping', 'Notes') }}
+{{ fmt | format('-' * 15, '-' * hw, '-' * 22, '-' * 22, '-' * 28, '-' * 7, '-' * 20) }}
+{% for r in ip_inventory_hosts %}
+{% set m = r.metadata | default({}) %}
+{{ fmt | format(
+     r.ip or '-',
+     hostname_display(r) | truncate(hw, true, '…', 0),
+     mac_display(r) | truncate(22, true, '…', 0),
+     (m.all_sources | default([r.source])) | join(',') | truncate(22, true, '…', 0),
+     (m.all_record_types | default([r.record_type])) | join(',') | truncate(28, true, '…', 0),
+     r.ping_status or '-',
+     r.notes or '') }}
+{% endfor %}

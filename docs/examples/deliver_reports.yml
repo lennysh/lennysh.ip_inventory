@@ -1,0 +1,58 @@
+---
+# Run the pipeline, then deliver the reports however you like. The collection only renders
+# them; the file paths are in ip_inventory_report_files and a compact summary in
+# ip_inventory_summary. Each delivery below is optional: set its variable to turn it on.
+- name: IP inventory with report delivery
+  hosts: localhost
+  gather_facts: false
+  vars:
+    # Publish the HTML report on a web server (needs SSH access to it, e.g. an AAP Machine credential)
+    report_web_host: ""                        # e.g. web01.example.com
+    report_web_root: /var/www/html/ip-inventory
+    report_web_become: true
+    # Email the reports (needs community.general)
+    report_mail_to: ""                         # e.g. you@example.com
+    report_mail_from: ip-inventory@example.com
+    report_smtp_host: smtp.example.com
+    report_smtp_port: 25
+
+  roles:
+    - role: lennysh.ip_inventory.run
+
+  tasks:
+    - name: Pick the generated report files
+      ansible.builtin.set_fact:
+        report_html: "{{ ip_inventory_report_files | select('search', '/inventory[^/]*\\.html$') | first | default('') }}"
+        report_attachments: "{{ ip_inventory_report_files | select('search', '\\.(csv|md)$') | list }}"
+
+    - name: Publish the HTML report on the web server
+      when: report_web_host | length > 0 and report_html | length > 0
+      delegate_to: "{{ report_web_host or inventory_hostname }}"   # fallback only matters when skipped
+      become: "{{ report_web_become | default(true) }}"
+      block:
+        - name: Ensure the web directory exists
+          ansible.builtin.file:
+            path: "{{ report_web_root }}"
+            state: directory
+            mode: "0755"
+
+        - name: Copy the HTML report as index.html
+          ansible.builtin.copy:
+            src: "{{ report_html }}"
+            dest: "{{ report_web_root }}/index.html"
+            mode: "0644"
+
+    - name: Email the reports
+      community.general.mail:
+        host: "{{ report_smtp_host }}"
+        port: "{{ report_smtp_port }}"
+        from: "{{ report_mail_from }}"
+        to: "{{ report_mail_to }}"
+        subject: >-
+          IP inventory: {{ ip_inventory_summary.hosts }} hosts,
+          {{ ip_inventory_summary.issues.total }} finding(s)
+          ({{ ip_inventory_summary.issues.by_severity.high | default(0) }} high)
+        body: "{{ lookup('ansible.builtin.file', report_html) if report_html else 'See attachments.' }}"
+        subtype: html
+        attach: "{{ report_attachments }}"
+      when: report_mail_to | length > 0

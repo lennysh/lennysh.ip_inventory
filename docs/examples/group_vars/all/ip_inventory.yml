@@ -1,0 +1,82 @@
+---
+# Example settings for every source and stage.
+# Copy to group_vars/all/ip_inventory.yml next to your playbook (or pass with -e @file).
+# Secrets live in vault.yml (see vault.yml.example) or in the environment variables noted below.
+
+ip_inventory_sources: [opnsense, technitium, proxmox]   # add unifi to enable it
+
+# --- Global filters ------------------------------------------------------------
+ip_inventory_filters:
+  include_networks:
+    - 192.168.*
+  exclude_networks:
+    - 127.*
+    - 172.16.*
+    - 172.17.*
+    - 100.*
+  exclude_interfaces:
+    - lo0
+    - wan
+  exclude_name_patterns:
+    - "*docker*"
+    - "*podman*"
+
+# --- OPNsense ------------------------------------------------------------------
+ip_inventory_opnsense_url: https://opnsense.example.com
+ip_inventory_opnsense_api_key: "{{ vault_opnsense_api_key }}"          # or $OPNSENSE_API_KEY
+ip_inventory_opnsense_api_secret: "{{ vault_opnsense_api_secret }}"    # or $OPNSENSE_API_SECRET
+ip_inventory_opnsense_validate_certs: false
+ip_inventory_opnsense_dhcp_backend: auto
+ip_inventory_opnsense_collect:
+  dhcp_leases: false
+  dhcp_static: false
+  unbound_overrides: false
+  arp_table: true
+  interfaces: true
+  vlans: true
+ip_inventory_opnsense_filters:
+  exclude_interfaces: [lo0, wan]
+
+# --- Technitium DNS ------------------------------------------------------------
+ip_inventory_technitium_url: http://technitium.example.com:5380
+ip_inventory_technitium_token: "{{ vault_technitium_token }}"         # or $TECHNITIUM_TOKEN
+# ip_inventory_technitium_user: admin
+# ip_inventory_technitium_password: "{{ vault_technitium_password }}"
+ip_inventory_technitium_collect:
+  dns_records: true
+  dns_cnames: true
+  dns_ptrs: true
+  dhcp_leases: true
+  dhcp_scopes: true
+
+# --- Proxmox VE ----------------------------------------------------------------
+ip_inventory_proxmox_url: https://proxmox.example.com:8006
+ip_inventory_proxmox_token_id: ip-inventory@pam!inventory
+ip_inventory_proxmox_token_secret: "{{ vault_proxmox_token_secret }}" # or $PROXMOX_TOKEN_SECRET
+ip_inventory_proxmox_validate_certs: false
+ip_inventory_proxmox_use_guest_agent: true
+ip_inventory_proxmox_filters:
+  exclude_name_patterns: ["*docker*", "*podman*"]
+
+# --- UniFi Network -------------------------------------------------------------
+ip_inventory_unifi_url: https://unifi.example.com
+ip_inventory_unifi_site: default
+ip_inventory_unifi_unifi_os: true
+ip_inventory_unifi_api_key: "{{ vault_unifi_api_key | default('') }}" # or $UNIFI_API_KEY
+ip_inventory_unifi_validate_certs: false
+ip_inventory_unifi_collect:
+  active_clients: true
+  known_clients: true
+  devices: true
+
+# --- Ping ----------------------------------------------------------------------
+ip_inventory_ping_enabled: true
+ip_inventory_ping_timeout: 1.0
+ip_inventory_ping_concurrency: 50
+ip_inventory_discover_unknown: false
+ip_inventory_discover_private_only: true
+ip_inventory_discover_max_hosts_per_subnet: 512
+
+# --- Output --------------------------------------------------------------------
+# Defaults to ./output relative to where you run ansible-playbook.
+# ip_inventory_output_dir: /srv/reports/ip-inventory

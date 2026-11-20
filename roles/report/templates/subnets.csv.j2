@@ -1,0 +1,10 @@
+{#- Network topology: one row per interface subnet, plus VLAN definitions with no subnet. -#}
+{{ '﻿' if ip_inventory_csv_bom | bool else '' }}{{ ['interface', 'description', 'vlan', 'vlan_name', 'vlan_parent', 'gateway_ip', 'cidr', 'netmask', 'prefix_length', 'broadcast', 'total_hosts'] | lennysh.ip_inventory.csv_row }}
+{% for s in ip_inventory_subnets | default([]) %}
+{% set m = s.metadata | default({}) %}
+{{ [s.hostname, s.notes, s.vlan, m.vlan_name | default(''), m.vlan_parent | default(''), s.ip, m.cidr | default(''), m.netmask | default(''), m.prefix_length | default(''), m.broadcast | default(''), m.total_hosts | default('')] | lennysh.ip_inventory.csv_row }}
+{% endfor %}
+{% for v in ip_inventory_orphan_vlans | default([]) %}
+{% set m = v.metadata | default({}) %}
+{{ ['', v.notes, v.vlan, m.vlan_name | default(v.hostname, true), m.vlan_parent | default(m.parent, true) | default('', true), '', '', '', '', '', ''] | lennysh.ip_inventory.csv_row }}
+{% endfor %}

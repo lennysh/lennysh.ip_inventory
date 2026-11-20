@@ -1,0 +1,45 @@
+---
+argument_specs:
+  main:
+    short_description: Collect IP observations from Proxmox VE
+    version_added: 1.0.0
+    description:
+      - Runs M(lennysh.ip_inventory.proxmox_info) to read QEMU guest-agent IPs, LXC runtime IPs and static IPs from guest
+        config, applies include/exclude rules and appends the records to C(ip_inventory_observations).
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_proxmox_url:
+        type: str
+        description: Proxmox base URL, e.g. https://pve.example.com:8006. Falls back to E(PROXMOX_URL).
+      ip_inventory_proxmox_token_id:
+        type: str
+        description: API token ID (user@realm!name). Falls back to E(PROXMOX_TOKEN_ID).
+      ip_inventory_proxmox_token_secret:
+        type: str
+        description: API token secret. Falls back to E(PROXMOX_TOKEN_SECRET). Store it in Ansible Vault.
+        no_log: true
+      ip_inventory_proxmox_validate_certs:
+        type: bool
+        description: Verify TLS certificates.
+        default: false
+      ip_inventory_proxmox_timeout:
+        type: int
+        description: HTTP timeout in seconds.
+        default: 30
+      ip_inventory_proxmox_use_guest_agent:
+        type: bool
+        description: Query the QEMU guest agent of running VMs.
+        default: true
+      ip_inventory_proxmox_filters:
+        type: dict
+        description: Per-source include/exclude rules, stacked on C(ip_inventory_filters).
+        default: {}
+      ip_inventory_filters:
+        type: dict
+        default: {}
+        description: Global include/exclude rules applied to every source.
+      ip_inventory_ignore_source_errors:
+        type: bool
+        default: false
+        description: Record a failure in C(ip_inventory_source_stats) and continue instead of failing the play.

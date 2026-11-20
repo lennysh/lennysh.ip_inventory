@@ -1,0 +1,45 @@
+---
+# Shared tail for every collect_<source> role.
+#
+# Inputs (passed as include vars):
+#   collect_common_source   source name, e.g. opnsense
+#   collect_common_result   registered result of the <source>_info module
+#   collect_common_filters  per-source include/exclude rules (dict)
+#
+# Outputs (facts):
+#   ip_inventory_observations   accumulated, filtered observation records
+#   ip_inventory_source_stats   {source: {collected, kept, failed, warnings}}
+#   ip_inventory_warnings       list of warning strings
+
+- name: "Apply include/exclude rules to records from {{ collect_common_source }}"
+  ansible.builtin.set_fact:
+    _ip_inventory_collected: "{{ collect_common_result.records | default([]) }}"
+    _ip_inventory_kept: >-
+      {{ collect_common_result.records | default([])
+         | lennysh.ip_inventory.filter_records(ip_inventory_filters | default({}),
+                                               {collect_common_source: collect_common_filters | default({})}) }}
+
+- name: "Add records to the observation set from {{ collect_common_source }}"
+  ansible.builtin.set_fact:
+    ip_inventory_observations: "{{ ip_inventory_observations | default([]) + _ip_inventory_kept | default([]) }}"
+    ip_inventory_source_stats: >-
+      {{ ip_inventory_source_stats | default({}) | combine({
+           collect_common_source: {
+             'collected': _ip_inventory_collected | length,
+             'kept': _ip_inventory_kept | length,
+             'failed': collect_common_result.failed | default(false),
+             'msg': collect_common_result.msg | default('') if collect_common_result.failed | default(false) else '',
+             'warnings': collect_common_result.warnings | default([]),
+           }}) }}
+    ip_inventory_warnings: >-
+      {{ ip_inventory_warnings | default([])
+         + collect_common_result.warnings | default([])
+         + ([collect_common_source ~ ' failed: ' ~ collect_common_result.msg | default('unknown error')]
+            if collect_common_result.failed | default(false) else []) }}
+
+- name: "Report collection results for {{ collect_common_source }}"
+  ansible.builtin.debug:
+    msg: >-
+      {{ collect_common_source }}: {{ _ip_inventory_collected | length }} records collected,
+      {{ _ip_inventory_kept | length }} kept after filters{{ ' (FAILED: ' ~ collect_common_result.msg | default('') ~ ')'
+      if collect_common_result.failed | default(false) else '' }}

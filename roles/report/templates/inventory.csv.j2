@@ -1,0 +1,25 @@
+{#- One row per IP. Multi-value columns use ';'. Every field is quoted. -#}
+{{ '﻿' if ip_inventory_csv_bom | bool else '' }}{{ ['ip', 'hostname', 'sources', 'record_types', 'all_hostnames', 'dns_names', 'cname_aliases', 'dns_only', 'mac', 'all_macs', 'vlan', 'vlan_name', 'subnet', 'netmask', 'prefix_length', 'interface', 'ping_status', 'notes'] | lennysh.ip_inventory.csv_row }}
+{% for r in ip_inventory_hosts %}
+{% set m = r.metadata | default({}) %}
+{{ [
+  r.ip,
+  r.hostname,
+  (m.all_sources | default([r.source])) | join(';'),
+  (m.all_record_types | default([r.record_type])) | join(';'),
+  (m.all_hostnames | default([])) | join(';'),
+  (m.dns_names | default([])) | join(';'),
+  (m.cname_aliases | default([])) | join(';'),
+  'yes' if m.dns_only | default(false) else '',
+  r.mac,
+  (m.all_macs | default([])) | join(';'),
+  r.vlan or m.vlan_tag | default(''),
+  m.vlan_name | default(''),
+  m.subnet if 'subnet' in m else m.cidr | default(''),
+  m.netmask | default(''),
+  m.prefix_length | default(''),
+  m.interface if 'interface' in m else r.hostname,
+  r.ping_status,
+  r.notes,
+] | lennysh.ip_inventory.csv_row }}
+{% endfor %}

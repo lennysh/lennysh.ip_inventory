@@ -1,0 +1,11 @@
+---
+# Technitium DNS connection. Secrets should come from Ansible Vault (or the env vars noted in
+# meta/argument_specs.yml); empty values are omitted so the module's env fallbacks apply.
+ip_inventory_technitium_url: ""
+ip_inventory_technitium_token: ""
+ip_inventory_technitium_user: ""
+ip_inventory_technitium_password: ""
+ip_inventory_technitium_validate_certs: true
+ip_inventory_technitium_timeout: 30
+ip_inventory_technitium_collect: {}
+ip_inventory_technitium_filters: {}

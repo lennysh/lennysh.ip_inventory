@@ -1,0 +1,33 @@
+---
+DOCUMENTATION:
+  name: filter_records
+  short_description: Apply include/exclude rules to observation records
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Drops records matching global or per-source exclude rules, or falling outside include_networks.
+  options:
+    _input:
+      description: Observation records.
+      type: list
+      required: true
+      elements: dict
+    filters:
+      description: 'Global rules: include_networks, exclude_networks, exclude_interfaces, exclude_name_patterns, exclude_record_types.'
+      type: dict
+      required: false
+    source_filters:
+      description: Per-source rules keyed by source name; excludes stack on the global rules, include_networks replaces them.
+      type: dict
+      required: false
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      kept: "{{ records | lennysh.ip_inventory.filter_records({'exclude_networks': ['172.17.*']}) }}"
+
+RETURN:
+  _value:
+    description: Records that passed the rules.
+    type: list
+    elements: dict

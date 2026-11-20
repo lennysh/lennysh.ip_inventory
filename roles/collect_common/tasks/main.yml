@@ -1,0 +1,7 @@
+---
+# Not meant to be run directly. collect_* roles include tasks_from: add.yml.
+- name: Explain usage
+  ansible.builtin.fail:
+    msg: >-
+      lennysh.ip_inventory.collect_common is a helper. Include it with tasks_from: add.yml
+      from a collect_<source> role (see roles/collect_opnsense/tasks/main.yml).

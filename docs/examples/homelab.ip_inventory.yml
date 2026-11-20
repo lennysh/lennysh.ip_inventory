@@ -1,0 +1,56 @@
+---
+# Dynamic inventory from the same sources.
+#   ansible-inventory -i homelab.ip_inventory.yml --graph
+#   ansible -i homelab.ip_inventory.yml 'vlan_iot:&ping_down' --list-hosts
+# The file name must end in ip_inventory.yml / ip_inventory.yaml.
+plugin: lennysh.ip_inventory.ip_inventory
+
+sources:
+  opnsense:
+    url: https://opnsense.example.com
+    # Secrets: Jinja, ${VAR} or the default env vars (OPNSENSE_API_KEY / OPNSENSE_API_SECRET)
+    api_key: "{{ lookup('ansible.builtin.env', 'OPNSENSE_API_KEY') }}"
+    api_secret: ${OPNSENSE_API_SECRET}
+    filters:
+      exclude_interfaces: [lo0, wan]
+  technitium:
+    url: http://technitium.example.com:5380
+  proxmox:
+    url: https://proxmox.example.com:8006
+    token_id: ip-inventory@pam!inventory
+    filters:
+      exclude_name_patterns: ["*docker*"]
+  unifi:
+    enabled: false
+    url: https://unifi.example.com
+
+filters:
+  include_networks: [192.168.*]
+  exclude_networks: [127.*, 172.16.*, 172.17.*, 100.*]
+  exclude_interfaces: [lo0, wan]
+  exclude_name_patterns: ["*docker*", "*podman*"]
+
+# One bad source should not take the whole inventory down.
+ignore_source_errors: true
+
+# hostname | short_hostname | ip
+hostname_strategy: short_hostname
+
+# ICMP from the controller while parsing; pair with a cache.
+ping: false
+discover_unknown: false
+
+cache: true
+cache_plugin: ansible.builtin.jsonfile
+cache_connection: ~/.cache/ansible-ip-inventory
+cache_timeout: 900
+
+# Standard constructed-plugin features
+compose:
+  is_vm: "'proxmox' in ip_inventory_sources"
+groups:
+  stale_dns_candidates: ip_inventory_dns_only
+  proxmox_running: ip_inventory_proxmox_status | default('') == 'running'
+keyed_groups:
+  - key: ip_inventory_record_types
+    prefix: seen_as

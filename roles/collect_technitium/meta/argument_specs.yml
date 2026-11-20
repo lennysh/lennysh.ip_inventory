@@ -1,0 +1,49 @@
+---
+argument_specs:
+  main:
+    short_description: Collect IP observations from Technitium DNS
+    version_added: 1.0.0
+    description:
+      - Runs M(lennysh.ip_inventory.technitium_info) to read A/ANAME/CNAME/PTR zone records, DHCP leases and reservations,
+        applies include/exclude rules and appends the records to C(ip_inventory_observations).
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_technitium_url:
+        type: str
+        description: Technitium base URL, e.g. http://dns.example.com:5380. Falls back to E(TECHNITIUM_URL).
+      ip_inventory_technitium_token:
+        type: str
+        description: API token. Falls back to E(TECHNITIUM_TOKEN). Store it in Ansible Vault.
+        no_log: true
+      ip_inventory_technitium_user:
+        type: str
+        description: Username, used when no token is set. Falls back to E(TECHNITIUM_USER).
+      ip_inventory_technitium_password:
+        type: str
+        description: Password. Falls back to E(TECHNITIUM_PASSWORD).
+        no_log: true
+      ip_inventory_technitium_validate_certs:
+        type: bool
+        description: Verify TLS certificates.
+        default: true
+      ip_inventory_technitium_timeout:
+        type: int
+        description: HTTP timeout in seconds.
+        default: 30
+      ip_inventory_technitium_collect:
+        type: dict
+        description: Datasets to collect (dns_records, dns_cnames, dns_ptrs, dhcp_leases, dhcp_scopes).
+        default: {}
+      ip_inventory_technitium_filters:
+        type: dict
+        description: Per-source include/exclude rules, stacked on C(ip_inventory_filters).
+        default: {}
+      ip_inventory_filters:
+        type: dict
+        default: {}
+        description: Global include/exclude rules applied to every source.
+      ip_inventory_ignore_source_errors:
+        type: bool
+        default: false
+        description: Record a failure in C(ip_inventory_source_stats) and continue instead of failing the play.

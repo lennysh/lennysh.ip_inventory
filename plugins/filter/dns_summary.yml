@@ -1,0 +1,29 @@
+---
+DOCUMENTATION:
+  name: dns_summary
+  short_description: Summarise DNS health of the inventory
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Counts IPs with CNAME aliases, multiple DNS names, DNS-only rows and DNS names whose IP does not answer ping.
+  options:
+    _input:
+      description: Reconciled host records.
+      type: list
+      required: true
+      elements: dict
+    limit:
+      description: Number of sample rows to include.
+      type: int
+      required: false
+      default: 10
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      dns: "{{ hosts | lennysh.ip_inventory.dns_summary }}"
+
+RETURN:
+  _value:
+    description: Counts plus C(dns_only_sample) and C(dns_ping_down_sample).
+    type: dict

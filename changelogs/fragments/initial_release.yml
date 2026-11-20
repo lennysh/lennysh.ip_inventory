@@ -1,0 +1,42 @@
+---
+release_summary: |
+  Initial release of ``lennysh.ip_inventory``. Collect hostname and IP data from OPNsense,
+  Technitium DNS, Proxmox VE and UniFi Network, reconcile it into one row per IP, ping it,
+  flag anomalies, render reports from Jinja2 templates, and expose everything as a dynamic
+  inventory. No Python dependencies beyond ansible-core 2.16+ (the default in AAP 2.4 to 2.7
+  execution environments).
+major_changes:
+  - >-
+    Collector modules ``opnsense_info``, ``technitium_info``, ``proxmox_info`` and ``unifi_info``
+    return observations in one common record schema, plus ``icmp_ping`` for concurrent ICMP checks.
+  - >-
+    The ``ip_inventory`` inventory plugin builds an inventory with built-in groups (source, record type,
+    subnet, VLAN, interface, ping, DNS-only, issues, Proxmox, UniFi), host and group variables,
+    caching, and ``compose`` / ``groups`` / ``keyed_groups`` support.
+  - >-
+    Roles ``collect_opnsense``, ``collect_technitium``, ``collect_proxmox``, ``collect_unifi``,
+    ``collect_common``, ``reconcile``, ``reachability``, ``issues``, ``report`` and the ``run``
+    orchestration role, plus the ``lennysh.ip_inventory.run`` playbook for the whole pipeline.
+  - >-
+    Filter plugins expose every processing step (``filter_records``, ``reconcile``, ``apply_ping``,
+    ``sweep_candidates``, ``discovered``, ``analyze_issues``, ``issue_summary``, ``issues_by_ip``,
+    ``dns_summary``, ``sort_records``, ``enrich_subnets``, ``pingable_ips``, ``csv_row``).
+minor_changes:
+  - >-
+    Jinja2 report templates for inventory JSON/CSV/TXT/HTML, subnets CSV and issues Markdown/CSV,
+    custom report templates via ``ip_inventory_report_custom``, and an ``ip_inventory_summary``
+    fact published with ``set_stats``.
+  - >-
+    Issue checks for MAC conflicts, shared MACs and hostnames, DNS-only records, unreachable hosts,
+    missing MACs, unknown devices found by the subnet sweep and heavy CNAME use;
+    ``ip_inventory_issues_fail_on`` fails a run on selected severities.
+  - >-
+    ``ip_inventory_ignore_source_errors`` (roles) and ``ignore_source_errors`` (inventory plugin)
+    keep going when a source is down.
+  - >-
+    Ansible Automation Platform support - ``meta/execution-environment.yml`` and ``bindep.txt`` make
+    ansible-builder install ``iputils``; ``docs/aap.md`` documents the custom credential type,
+    execution environment, template project and an ``infra.aap_configuration`` CasC file.
+  - >-
+    Report delivery example playbook (``docs/examples/deliver_reports.yml``) for web server and
+    e-mail delivery.

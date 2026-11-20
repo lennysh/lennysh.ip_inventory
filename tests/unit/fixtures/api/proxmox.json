@@ -1,0 +1,117 @@
+{
+  "GET /api2/json/cluster/resources": {
+    "data": [
+      {
+        "vmid": 100,
+        "node": "pve1",
+        "name": "web01",
+        "type": "qemu",
+        "status": "running",
+        "tags": "web;prod"
+      },
+      {
+        "vmid": 101,
+        "node": "pve1",
+        "name": "ct01",
+        "type": "lxc",
+        "status": "running"
+      },
+      {
+        "vmid": 102,
+        "node": "pve2",
+        "name": "docker-host",
+        "type": "qemu",
+        "status": "stopped"
+      },
+      {
+        "vmid": 103,
+        "node": "pve2",
+        "name": "noagent",
+        "type": "qemu",
+        "status": "running"
+      },
+      {
+        "vmid": 9000,
+        "node": "pve1",
+        "name": "tmpl",
+        "type": "qemu",
+        "status": "stopped",
+        "template": 1
+      }
+    ]
+  },
+  "GET /api2/json/nodes/pve1/qemu/100/agent/network-get-interfaces": {
+    "data": {
+      "result": [
+        {
+          "name": "lo",
+          "hardware-address": "00:00:00:00:00:00",
+          "ip-addresses": [
+            {
+              "ip-address-type": "ipv4",
+              "ip-address": "127.0.0.1"
+            }
+          ]
+        },
+        {
+          "name": "eth0",
+          "hardware-address": "bc:24:11:00:01:00",
+          "ip-addresses": [
+            {
+              "ip-address-type": "ipv4",
+              "ip-address": "192.168.1.50",
+              "prefix": 24
+            },
+            {
+              "ip-address-type": "ipv6",
+              "ip-address": "fe80::1",
+              "prefix": 64
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "GET /api2/json/nodes/pve1/qemu/100/config": {
+    "data": {
+      "name": "web01",
+      "net0": "virtio=BC:24:11:00:01:00,bridge=vmbr0"
+    }
+  },
+  "GET /api2/json/nodes/pve1/lxc/101/interfaces": {
+    "data": [
+      {
+        "name": "lo",
+        "inet": "127.0.0.1/8",
+        "hwaddr": "00:00:00:00:00:00"
+      },
+      {
+        "name": "eth0",
+        "inet": "192.168.1.51/24",
+        "hwaddr": "bc:24:11:00:01:01"
+      }
+    ]
+  },
+  "GET /api2/json/nodes/pve1/lxc/101/config": {
+    "data": {
+      "hostname": "ct01",
+      "net0": "name=eth0,bridge=vmbr0,hwaddr=BC:24:11:00:01:01,ip=192.168.1.51/24,gw=192.168.1.1"
+    }
+  },
+  "GET /api2/json/nodes/pve2/qemu/102/config": {
+    "data": {
+      "net0": "virtio=BC:24:11:00:01:02,bridge=vmbr0",
+      "ipconfig0": "ip=192.168.1.52/24"
+    }
+  },
+  "GET /api2/json/nodes/pve2/qemu/103/agent/network-get-interfaces": {
+    "__status__": 500,
+    "data": null,
+    "message": "QEMU guest agent is not running"
+  },
+  "GET /api2/json/nodes/pve2/qemu/103/config": {
+    "data": {
+      "net0": "virtio=BC:24:11:00:01:03,bridge=vmbr0"
+    }
+  }
+}

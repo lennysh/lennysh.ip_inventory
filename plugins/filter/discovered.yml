@@ -1,0 +1,34 @@
+---
+DOCUMENTATION:
+  name: discovered
+  short_description: Build records for sweep responders
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Turns sweep candidates that answered the ping into C(discovered) records with subnet/VLAN data.
+  options:
+    _input:
+      description: Candidates from sweep_candidates.
+      type: list
+      required: true
+      elements: dict
+    results:
+      description: icmp_ping C(reachable) mapping.
+      type: dict
+      required: true
+    subnets:
+      description: Subnet records.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      found: "{{ candidates | lennysh.ip_inventory.discovered(sweep.reachable, subnets) }}"
+
+RETURN:
+  _value:
+    description: Discovered records.
+    type: list
+    elements: dict

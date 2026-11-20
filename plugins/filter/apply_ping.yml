@@ -1,0 +1,29 @@
+---
+DOCUMENTATION:
+  name: apply_ping
+  short_description: Set ping_status on records
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Sets C(ping_status) to up, down or skipped (for subnet/VLAN rows) from an icmp_ping C(reachable) mapping.
+  options:
+    _input:
+      description: Records.
+      type: list
+      required: true
+      elements: dict
+    results:
+      description: Mapping of IP to true/false, as returned in C(reachable) by lennysh.ip_inventory.icmp_ping.
+      type: dict
+      required: true
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      hosts: "{{ hosts | lennysh.ip_inventory.apply_ping(ping.reachable) }}"
+
+RETURN:
+  _value:
+    description: Records with ping_status set.
+    type: list
+    elements: dict

@@ -1,0 +1,51 @@
+---
+argument_specs:
+  main:
+    short_description: Collect IP observations from OPNsense
+    version_added: 1.0.0
+    description:
+      - Runs M(lennysh.ip_inventory.opnsense_info) to read interface subnets, VLAN definitions and the ARP table (optionally
+        DHCP leases, Kea reservations and Unbound overrides), applies include/exclude rules and appends the records to C(ip_inventory_observations).
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_opnsense_url:
+        type: str
+        description: OPNsense base URL. Falls back to E(OPNSENSE_URL).
+      ip_inventory_opnsense_api_key:
+        type: str
+        description: API key. Falls back to E(OPNSENSE_API_KEY). Store it in Ansible Vault.
+        no_log: true
+      ip_inventory_opnsense_api_secret:
+        type: str
+        description: API secret. Falls back to E(OPNSENSE_API_SECRET). Store it in Ansible Vault.
+        no_log: true
+      ip_inventory_opnsense_validate_certs:
+        type: bool
+        description: Verify TLS certificates.
+        default: false
+      ip_inventory_opnsense_timeout:
+        type: int
+        description: HTTP timeout in seconds.
+        default: 30
+      ip_inventory_opnsense_dhcp_backend:
+        type: str
+        description: DHCP backend for lease/reservation collection (auto, kea, isc).
+        default: auto
+      ip_inventory_opnsense_collect:
+        type: dict
+        description: Datasets to collect, merged over the module defaults (arp_table, interfaces, vlans, dhcp_leases, dhcp_static,
+          unbound_overrides).
+        default: {}
+      ip_inventory_opnsense_filters:
+        type: dict
+        description: Per-source include/exclude rules, stacked on C(ip_inventory_filters).
+        default: {}
+      ip_inventory_filters:
+        type: dict
+        default: {}
+        description: Global include/exclude rules applied to every source.
+      ip_inventory_ignore_source_errors:
+        type: bool
+        default: false
+        description: Record a failure in C(ip_inventory_source_stats) and continue instead of failing the play.

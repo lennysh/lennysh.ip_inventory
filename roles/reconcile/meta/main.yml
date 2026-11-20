@@ -1,0 +1,15 @@
+---
+galaxy_info:
+  author: Lenny Shirley
+  description: Merge collected IP observations into one row per IP
+  license: GPL-3.0-or-later
+  min_ansible_version: '2.16'
+  platforms:
+    - name: GenericLinux
+      versions:
+        - all
+  galaxy_tags:
+    - network
+    - inventory
+    - ipam
+dependencies: []

@@ -1,0 +1,24 @@
+---
+DOCUMENTATION:
+  name: issues_by_ip
+  short_description: Map IPs to finding categories
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Returns a dict of IP to the list of issue categories that mention it.
+  options:
+    _input:
+      description: Findings.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      tags: "{{ findings | lennysh.ip_inventory.issues_by_ip }}"
+
+RETURN:
+  _value:
+    description: IP to category list.
+    type: dict

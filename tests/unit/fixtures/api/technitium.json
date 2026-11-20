@@ -1,0 +1,356 @@
+{
+  "GET /api/zones/list": {
+    "status": "ok",
+    "response": {
+      "zones": [
+        {
+          "name": "lab.example",
+          "type": "Primary"
+        },
+        {
+          "name": "1.168.192.in-addr.arpa",
+          "type": "Primary"
+        },
+        {
+          "name": "corp.example",
+          "type": "Forwarder"
+        },
+        {
+          "name": "localhost",
+          "type": "Primary",
+          "internal": true
+        }
+      ]
+    }
+  },
+  "GET /api/zones/records/get?zone=lab.example": {
+    "status": "ok",
+    "response": {
+      "records": [
+        {
+          "name": "nas.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.10"
+          }
+        },
+        {
+          "name": "lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.5"
+          }
+        },
+        {
+          "name": "old.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.99"
+          },
+          "comments": "decommissioned?"
+        },
+        {
+          "name": "printer.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.20.60"
+          }
+        },
+        {
+          "name": "multi.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.30"
+          }
+        },
+        {
+          "name": "multi.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.20.31"
+          }
+        },
+        {
+          "name": "proxy.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.40"
+          }
+        },
+        {
+          "name": "app.lab.example",
+          "type": "ANAME",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.41",
+            "aname": "x"
+          }
+        },
+        {
+          "name": "web01.lab.example",
+          "type": "A",
+          "ttl": 3600,
+          "rData": {
+            "ipAddress": "192.168.1.50"
+          }
+        },
+        {
+          "name": "gone.lab.example",
+          "type": "A",
+          "disabled": true,
+          "rData": {
+            "ipAddress": "192.168.1.98"
+          }
+        },
+        {
+          "name": "files.lab.example",
+          "type": "CNAME",
+          "ttl": 3600,
+          "rData": {
+            "cname": "nas.lab.example"
+          }
+        },
+        {
+          "name": "www.lab.example",
+          "type": "CNAME",
+          "ttl": 3600,
+          "rData": {
+            "cname": "files.lab.example."
+          }
+        },
+        {
+          "name": "*.apps.lab.example",
+          "type": "CNAME",
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "ext.lab.example",
+          "type": "CNAME",
+          "rData": {
+            "cname": "elsewhere.example.com"
+          }
+        },
+        {
+          "name": "loop1.lab.example",
+          "type": "CNAME",
+          "rData": {
+            "cname": "loop2.lab.example"
+          }
+        },
+        {
+          "name": "loop2.lab.example",
+          "type": "CNAME",
+          "rData": {
+            "cname": "loop1.lab.example"
+          }
+        },
+        {
+          "name": "lab.example",
+          "type": "MX",
+          "rData": {
+            "exchange": "mail.lab.example"
+          }
+        },
+        {
+          "name": "svc0.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc1.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc2.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc3.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc4.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc5.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc6.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc7.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc8.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc9.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc10.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc11.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc12.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        },
+        {
+          "name": "svc13.lab.example",
+          "type": "CNAME",
+          "ttl": 300,
+          "rData": {
+            "cname": "proxy.lab.example"
+          }
+        }
+      ]
+    }
+  },
+  "GET /api/zones/records/get?zone=1.168.192.in-addr.arpa": {
+    "status": "ok",
+    "response": {
+      "records": [
+        {
+          "name": "10.1.168.192.in-addr.arpa",
+          "type": "PTR",
+          "ttl": 3600,
+          "rData": {
+            "ptrName": "nas.lab.example."
+          }
+        },
+        {
+          "name": "99.1.168.192.in-addr.arpa",
+          "type": "PTR",
+          "ttl": 3600,
+          "rData": {
+            "ptrName": "old.lab.example"
+          }
+        },
+        {
+          "name": "1.168.192.in-addr.arpa",
+          "type": "SOA",
+          "rData": {}
+        }
+      ]
+    }
+  },
+  "GET /api/dhcp/leases/list": {
+    "status": "ok",
+    "response": {
+      "leases": [
+        {
+          "scope": "IoT",
+          "type": "Dynamic",
+          "hardwareAddress": "AA-BB-CC-00-00-50",
+          "address": "192.168.20.50",
+          "hostName": "iot-plug.lab.example",
+          "leaseObtained": "2026-11-16 10:00",
+          "leaseExpires": "2026-11-17 10:00"
+        },
+        {
+          "scope": "IoT",
+          "type": "Dynamic",
+          "hardwareAddress": "",
+          "address": "192.168.20.51",
+          "hostName": "nomac"
+        },
+        {
+          "scope": "LAN",
+          "type": "Reserved",
+          "hardwareAddress": "AA-BB-CC-99-99-10",
+          "address": "192.168.1.10",
+          "hostName": "nas"
+        }
+      ]
+    }
+  },
+  "GET /api/dhcp/scopes/list": {
+    "status": "ok",
+    "response": {
+      "scopes": [
+        {
+          "name": "IoT",
+          "enabled": true,
+          "reservedLeases": [
+            "printer.lab.example|AA-BB-CC-00-00-60|192.168.20.60|office printer",
+            {
+              "hostName": "cam1",
+              "hardwareAddress": "AA-BB-CC-00-00-70",
+              "address": "192.168.20.70"
+            },
+            "broken-entry"
+          ]
+        }
+      ]
+    }
+  }
+}

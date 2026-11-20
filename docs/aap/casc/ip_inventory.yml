@@ -1,0 +1,160 @@
+---
+# Configuration as Code for infra.aap_configuration (tested field names against 3.8.0).
+# Creates everything described in docs/aap.md. Apply with e.g.:
+#   ansible-playbook infra.aap_configuration.configure_aap -e @ip_inventory.yml -e @vault.yml --ask-vault-pass
+# Replace the example.com values; vault_* come from your own vault file.
+
+# --- 1. Custom credential type ------------------------------------------------
+# !unsafe keeps Ansible from templating the injector expressions while applying this file.
+controller_credential_types:
+  - name: IP Inventory Sources
+    description: API secrets for lennysh.ip_inventory (OPNsense, Technitium, Proxmox, UniFi)
+    kind: cloud
+    inputs:
+      fields:
+        - {id: opnsense_api_key, type: string, label: OPNsense API key, secret: true}
+        - {id: opnsense_api_secret, type: string, label: OPNsense API secret, secret: true}
+        - {id: technitium_token, type: string, label: Technitium API token, secret: true}
+        - {id: technitium_username, type: string, label: Technitium username}
+        - {id: technitium_password, type: string, label: Technitium password, secret: true}
+        - {id: proxmox_token_id, type: string, label: Proxmox API token ID, help_text: "user@realm!tokenname"}
+        - {id: proxmox_token_secret, type: string, label: Proxmox API token secret, secret: true}
+        - {id: unifi_api_key, type: string, label: UniFi API key, secret: true}
+        - {id: unifi_username, type: string, label: UniFi username}
+        - {id: unifi_password, type: string, label: UniFi password, secret: true}
+      required: []
+    injectors:
+      env:
+        OPNSENSE_API_KEY: !unsafe "{{ opnsense_api_key }}"
+        OPNSENSE_API_SECRET: !unsafe "{{ opnsense_api_secret }}"
+        TECHNITIUM_TOKEN: !unsafe "{{ technitium_token }}"
+        TECHNITIUM_USER: !unsafe "{{ technitium_username }}"
+        TECHNITIUM_PASSWORD: !unsafe "{{ technitium_password }}"
+        PROXMOX_TOKEN_ID: !unsafe "{{ proxmox_token_id }}"
+        PROXMOX_TOKEN_SECRET: !unsafe "{{ proxmox_token_secret }}"
+        UNIFI_API_KEY: !unsafe "{{ unifi_api_key }}"
+        UNIFI_USERNAME: !unsafe "{{ unifi_username }}"
+        UNIFI_PASSWORD: !unsafe "{{ unifi_password }}"
+
+# --- 2. Credential ------------------------------------------------------------
+controller_credentials:
+  - name: IP Inventory Sources - homelab
+    organization: Default
+    credential_type: IP Inventory Sources
+    inputs:
+      opnsense_api_key: "{{ vault_opnsense_api_key }}"
+      opnsense_api_secret: "{{ vault_opnsense_api_secret }}"
+      technitium_token: "{{ vault_technitium_token }}"
+      proxmox_token_id: "{{ vault_proxmox_token_id }}"
+      proxmox_token_secret: "{{ vault_proxmox_token_secret }}"
+      unifi_api_key: "{{ vault_unifi_api_key }}"
+      # or: unifi_username / unifi_password
+  # Only needed if ip_inventory.yml copies the reports to a web server over SSH.
+  # - name: Reports host SSH
+  #   organization: Default
+  #   credential_type: Machine
+  #   inputs:
+  #     username: ansible
+  #     ssh_key_data: "{{ vault_reports_ssh_key }}"
+
+# --- 3. Execution environment (built from docs/aap/execution-environment.yml) --
+controller_execution_environments:
+  - name: IP Inventory EE
+    image: registry.example.com/ip-inventory-ee:1.0.0
+    pull: missing
+    organization: Default
+
+# --- 4. Container group with ICMP allowed (OpenShift / operator installs only) --
+# Lets the unprivileged job pod use ping via net.ipv4.ping_group_range (a Kubernetes
+# "safe" sysctl, so no extra SCC privileges). Adjust namespace / resources to your install.
+controller_instance_groups:
+  - name: ip-inventory
+    is_container_group: true
+    pod_spec_override: |
+      apiVersion: v1
+      kind: Pod
+      metadata:
+        namespace: aap
+      spec:
+        serviceAccountName: default
+        automountServiceAccountToken: false
+        securityContext:
+          sysctls:
+            - name: net.ipv4.ping_group_range
+              value: "0 2147483647"
+        containers:
+          - image: registry.example.com/ip-inventory-ee:1.0.0
+            name: worker
+            args:
+              - ansible-runner
+              - worker
+              - --private-data-dir=/runner
+            resources:
+              requests:
+                cpu: 250m
+                memory: 100Mi
+
+# --- 5. Project (a repo laid out like docs/aap/project) ------------------------
+controller_projects:
+  - name: Homelab IP Inventory
+    organization: Default
+    scm_type: git
+    scm_url: https://github.com/example/homelab-automation.git
+    scm_branch: main
+    scm_update_on_launch: true
+    default_environment: IP Inventory EE
+
+# --- 6. Inventories ----------------------------------------------------------
+controller_inventories:
+  # Dynamic inventory built by the ip_inventory plugin
+  - name: Homelab (ip_inventory)
+    organization: Default
+    instance_groups: [ip-inventory]        # inventory updates run here too (ping); drop on VM-based installs
+  # Target for the report job template (it only runs on localhost inside the EE)
+  - name: IP Inventory Runner
+    organization: Default
+
+controller_hosts:
+  - name: localhost
+    inventory: IP Inventory Runner
+    variables:
+      ansible_connection: local
+      ansible_python_interpreter: !unsafe "{{ ansible_playbook_python }}"
+
+controller_inventory_sources:
+  - name: ip_inventory plugin
+    inventory: Homelab (ip_inventory)
+    organization: Default
+    source: scm
+    source_project: Homelab IP Inventory
+    source_path: inventories/homelab.ip_inventory.yml
+    credential: IP Inventory Sources - homelab
+    execution_environment: IP Inventory EE
+    overwrite: true
+    overwrite_vars: true
+    update_on_launch: true
+    update_cache_timeout: 900
+
+# --- 7. Job template ------------------------------------------------------------
+controller_templates:
+  - name: IP Inventory Report
+    organization: Default
+    job_type: run
+    project: Homelab IP Inventory
+    playbook: ip_inventory.yml
+    inventory: IP Inventory Runner
+    execution_environment: IP Inventory EE
+    instance_groups: [ip-inventory]        # drop on VM-based installs
+    credentials:
+      - IP Inventory Sources - homelab
+      # - Reports host SSH
+    ask_variables_on_launch: true
+
+# --- 8. Schedules -------------------------------------------------------------
+controller_schedules:
+  - name: IP Inventory Report - nightly
+    unified_job_template: IP Inventory Report
+    rrule: "DTSTART;TZID=UTC:20261120T020000 RRULE:FREQ=DAILY;INTERVAL=1"
+  - name: Homelab inventory sync - hourly
+    unified_job_template: ip_inventory plugin
+    rrule: "DTSTART;TZID=UTC:20261120T000000 RRULE:FREQ=HOURLY;INTERVAL=1"

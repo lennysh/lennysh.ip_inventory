@@ -1,0 +1,25 @@
+---
+DOCUMENTATION:
+  name: sort_records
+  short_description: Sort inventory rows
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Sorts by IP, placing ping-sweep discoveries and VLAN rows last.
+  options:
+    _input:
+      description: Records.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      rows: "{{ hosts | lennysh.ip_inventory.sort_records }}"
+
+RETURN:
+  _value:
+    description: Sorted records.
+    type: list
+    elements: dict

@@ -1,0 +1,24 @@
+---
+DOCUMENTATION:
+  name: issue_summary
+  short_description: Count findings by severity and category
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Summarises a findings list.
+  options:
+    _input:
+      description: Findings.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      summary: "{{ findings | lennysh.ip_inventory.issue_summary }}"
+
+RETURN:
+  _value:
+    description: Dict with total, by_severity, by_category, categories.
+    type: dict

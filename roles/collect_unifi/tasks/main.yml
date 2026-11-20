@@ -1,0 +1,23 @@
+---
+- name: Collect observations from UniFi Network
+  lennysh.ip_inventory.unifi_info:
+    url: "{{ ip_inventory_unifi_url | default(omit, true) }}"
+    api_key: "{{ ip_inventory_unifi_api_key | default(omit, true) }}"
+    username: "{{ ip_inventory_unifi_username | default(omit, true) }}"
+    password: "{{ ip_inventory_unifi_password | default(omit, true) }}"
+    site: "{{ ip_inventory_unifi_site }}"
+    unifi_os: "{{ ip_inventory_unifi_unifi_os }}"
+    validate_certs: "{{ ip_inventory_unifi_validate_certs }}"
+    timeout: "{{ ip_inventory_unifi_timeout }}"
+    collect: "{{ ip_inventory_unifi_collect }}"
+  register: _ip_inventory_unifi_result
+  ignore_errors: "{{ ip_inventory_ignore_source_errors | default(false) }}"
+
+- name: Filter and add UniFi Network observations
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.collect_common
+    tasks_from: add.yml
+  vars:
+    collect_common_source: unifi
+    collect_common_result: "{{ _ip_inventory_unifi_result }}"
+    collect_common_filters: "{{ ip_inventory_unifi_filters }}"

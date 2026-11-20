@@ -1,0 +1,4 @@
+# System packages needed by lennysh.ip_inventory (read by ansible-builder).
+# icmp_ping / the reachability role shell out to the ping binary.
+iputils [platform:rpm]
+iputils-ping [platform:dpkg]

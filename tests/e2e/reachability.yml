@@ -1,0 +1,39 @@
+---
+# Exercises the reachability role with real ICMP, confined to loopback (127.0.0.0/29),
+# so it is safe to run anywhere:  ansible-playbook tests/e2e/reachability.yml
+- name: Reachability role against loopback
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ip_inventory_observations:
+      - {ip: 127.0.0.1, hostname: gw, source: test, record_type: subnet, metadata: {cidr: 127.0.0.0/29}}
+      - {ip: 127.0.0.3, hostname: known, source: test, record_type: arp, mac: "aa:bb:cc:dd:ee:03"}
+      - {ip: 192.0.2.10, hostname: testnet, source: test, record_type: dns_a}
+    ip_inventory_discover_unknown: true
+  tasks:
+    - name: Reconcile
+      ansible.builtin.include_role:
+        name: lennysh.ip_inventory.reconcile
+
+    - name: Ping and sweep
+      ansible.builtin.include_role:
+        name: lennysh.ip_inventory.reachability
+
+    - name: Check ping status and discoveries
+      ansible.builtin.assert:
+        that:
+          - (ip_inventory_hosts | selectattr('ip', 'equalto', '127.0.0.3') | first).ping_status == 'up'
+          - (ip_inventory_hosts | selectattr('ip', 'equalto', '192.0.2.10') | first).ping_status == 'down'
+          - ip_inventory_discovered | map(attribute='ip') | list == ['127.0.0.2', '127.0.0.4', '127.0.0.5', '127.0.0.6']
+          - ip_inventory_discovered | map(attribute='record_type') | unique | list == ['discovered']
+          - (ip_inventory_hosts | last).record_type == 'discovered'
+
+    - name: Issues flag the unreachable DNS name and the discoveries
+      ansible.builtin.include_role:
+        name: lennysh.ip_inventory.issues
+
+    - name: Check findings
+      ansible.builtin.assert:
+        that:
+          - "'discovered' in ip_inventory_issue_summary.categories"
+          - ip_inventory_issue_summary.by_category.discovered == 4

@@ -1,0 +1,39 @@
+---
+- name: Check that at least one source is selected
+  ansible.builtin.assert:
+    that: ip_inventory_sources | length > 0
+    fail_msg: No sources selected. Set ip_inventory_sources (e.g. [opnsense, technitium, proxmox, unifi]).
+    quiet: true
+
+- name: Reset collected data
+  ansible.builtin.set_fact:
+    ip_inventory_observations: []
+    ip_inventory_source_stats: {}
+    ip_inventory_warnings: []
+    ip_inventory_discovered: []
+    ip_inventory_findings: []
+
+- name: Collect from each source
+  ansible.builtin.include_role:
+    name: "{{ _ip_inventory_source if '.' in _ip_inventory_source else 'lennysh.ip_inventory.collect_' ~ _ip_inventory_source }}"
+  loop: "{{ ip_inventory_sources }}"
+  loop_control:
+    loop_var: _ip_inventory_source
+
+- name: Reconcile observations
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.reconcile
+
+- name: Check reachability
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.reachability
+  when: ip_inventory_reachability_enabled | bool
+
+- name: Analyze issues
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.issues
+
+- name: Render reports
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.report
+  when: ip_inventory_report_enabled | bool

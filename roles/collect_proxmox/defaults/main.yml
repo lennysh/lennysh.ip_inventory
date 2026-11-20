@@ -1,0 +1,10 @@
+---
+# Proxmox VE connection. Secrets should come from Ansible Vault (or the env vars noted in
+# meta/argument_specs.yml); empty values are omitted so the module's env fallbacks apply.
+ip_inventory_proxmox_url: ""
+ip_inventory_proxmox_token_id: ""
+ip_inventory_proxmox_token_secret: ""
+ip_inventory_proxmox_validate_certs: false
+ip_inventory_proxmox_timeout: 30
+ip_inventory_proxmox_use_guest_agent: true
+ip_inventory_proxmox_filters: {}

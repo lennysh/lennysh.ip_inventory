@@ -1,0 +1,46 @@
+---
+argument_specs:
+  main:
+    short_description: Flag anomalies in the reconciled inventory
+    version_added: 1.0.0
+    description:
+      - Runs the issue checks over C(ip_inventory_hosts) and sets C(ip_inventory_findings) and C(ip_inventory_issue_summary).
+      - "Checks: mac_conflict, mac_shared, hostname_shared, dns_only, discovered, dns_unreachable,
+        active_unreachable, missing_mac, cname_aliases."
+    author:
+      - Lenny Shirley (@lennysh)
+    options:
+      ip_inventory_hosts:
+        type: list
+        elements: dict
+        required: true
+        description: Reconciled host records.
+      ip_inventory_subnets:
+        type: list
+        elements: dict
+        default: []
+        description: Subnet records (gateway detection).
+      ip_inventory_issues_enabled:
+        type: bool
+        default: true
+        description: Run the analysis. When false C(ip_inventory_findings) is empty.
+      ip_inventory_issues_checks:
+        type: list
+        elements: str
+        default: []
+        description: Only run these checks. Empty runs all of them.
+      ip_inventory_issues_skip_checks:
+        type: list
+        elements: str
+        default: []
+        description: Checks to skip.
+      ip_inventory_issues_cname_alias_threshold:
+        type: int
+        default: 10
+        description: Minimum CNAME aliases on one IP to report C(cname_aliases).
+      ip_inventory_issues_fail_on:
+        type: list
+        elements: str
+        default: []
+        choices: [high, medium, low, info]
+        description: Fail the play if findings with these severities exist.

@@ -1,0 +1,50 @@
+---
+- name: Ping known addresses
+  when: ip_inventory_ping_enabled | bool
+  block:
+    - name: Send ICMP echo to every known IP
+      lennysh.ip_inventory.icmp_ping:
+        targets: "{{ ip_inventory_hosts | lennysh.ip_inventory.pingable_ips }}"
+        timeout: "{{ ip_inventory_ping_timeout }}"
+        concurrency: "{{ ip_inventory_ping_concurrency }}"
+      register: _ip_inventory_ping
+
+    - name: Record ping status on hosts
+      ansible.builtin.set_fact:
+        ip_inventory_hosts: "{{ ip_inventory_hosts | lennysh.ip_inventory.apply_ping(_ip_inventory_ping.reachable) }}"
+
+- name: Sweep collected subnets for unknown hosts
+  when:
+    - ip_inventory_discover_unknown | bool
+    - not ip_inventory_raw | default(false) | bool
+  block:
+    - name: Work out unused addresses to sweep
+      ansible.builtin.set_fact:
+        _ip_inventory_sweep_candidates: >-
+          {{ ip_inventory_subnets | lennysh.ip_inventory.sweep_candidates(
+               ip_inventory_hosts,
+               max_hosts_per_subnet=ip_inventory_discover_max_hosts_per_subnet | int,
+               private_only=ip_inventory_discover_private_only | bool) }}
+
+    - name: Ping unused addresses in collected subnets
+      lennysh.ip_inventory.icmp_ping:
+        targets: "{{ _ip_inventory_sweep_candidates | map(attribute='ip') | list }}"
+        timeout: "{{ ip_inventory_ping_timeout }}"
+        concurrency: "{{ ip_inventory_ping_concurrency }}"
+      register: _ip_inventory_sweep
+      when: _ip_inventory_sweep_candidates | length > 0
+
+    - name: Add responders as discovered hosts
+      ansible.builtin.set_fact:
+        ip_inventory_discovered: "{{ _ip_inventory_discovered }}"
+        ip_inventory_hosts: "{{ (ip_inventory_hosts + _ip_inventory_discovered) | lennysh.ip_inventory.sort_records }}"
+      vars:
+        _ip_inventory_discovered: >-
+          {{ _ip_inventory_sweep_candidates
+             | lennysh.ip_inventory.discovered(_ip_inventory_sweep.reachable | default({}), ip_inventory_subnets) }}
+
+    - name: Report sweep results
+      ansible.builtin.debug:
+        msg: >-
+          Swept {{ _ip_inventory_sweep_candidates | length }} unused addresses,
+          found {{ ip_inventory_discovered | length }} unknown active hosts

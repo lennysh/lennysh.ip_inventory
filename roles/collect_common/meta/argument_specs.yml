@@ -1,0 +1,31 @@
+---
+argument_specs:
+  main:
+    short_description: Shared helper for the collect_* roles (use tasks_from add.yml)
+    version_added: 1.0.0
+    description: Fails with usage help. Use C(tasks_from=add.yml).
+    options: {}
+  add:
+    short_description: Filter a collector's records and add them to ip_inventory_observations
+    version_added: 1.0.0
+    description:
+      - Called by every C(collect_<source>) role after running its C(<source>_info) module.
+      - Applies the global C(ip_inventory_filters) plus per-source rules, then appends to C(ip_inventory_observations) and
+        updates C(ip_inventory_source_stats).
+    options:
+      collect_common_source:
+        type: str
+        required: true
+        description: Source name, used for per-source filters and stats.
+      collect_common_result:
+        type: dict
+        required: true
+        description: Registered result of the collector module (needs C(records)).
+      collect_common_filters:
+        type: dict
+        default: {}
+        description: Per-source include/exclude rules.
+      ip_inventory_filters:
+        type: dict
+        default: {}
+        description: Global include/exclude rules applied to every source.

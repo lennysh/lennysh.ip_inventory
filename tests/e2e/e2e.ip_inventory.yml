@@ -1,0 +1,34 @@
+---
+# Inventory plugin against tests/e2e/mock_api.py:
+#   E2E_TECHNITIUM_TOKEN=x ansible-inventory -i tests/e2e/e2e.ip_inventory.yml --graph
+plugin: lennysh.ip_inventory.ip_inventory
+sources:
+  opnsense:
+    url: http://127.0.0.1:8765
+    api_key: "{{ 'dummy' ~ '-key' }}"           # Jinja is rendered
+    api_secret: dummy-secret
+    filters:
+      exclude_interfaces: [lo0]
+  technitium:
+    url: http://127.0.0.1:8765
+    token: ${E2E_TECHNITIUM_TOKEN}              # ${VAR} is expanded
+  proxmox:
+    url: http://127.0.0.1:8765
+    token_id: inventory@pam!e2e
+    token_secret: dummy-uuid
+  unifi:
+    url: http://127.0.0.1:8765
+    api_key: dummy-unifi
+filters:
+  include_networks: ["192.168.*"]
+  exclude_networks: ["127.*", "172.17.*"]
+  exclude_interfaces: [lo0, wan]
+  exclude_name_patterns: ["*docker*"]
+hostname_strategy: hostname
+compose:
+  is_vm: "'proxmox' in ip_inventory_sources"
+keyed_groups:
+  - key: ip_inventory_vlan_name | default('none', true)
+    prefix: net
+groups:
+  stale_dns: ip_inventory_dns_only

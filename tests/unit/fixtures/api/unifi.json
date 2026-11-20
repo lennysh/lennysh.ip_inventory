@@ -1,0 +1,63 @@
+{
+  "GET /proxy/network/api/s/default/stat/sta": {
+    "meta": {
+      "rc": "ok"
+    },
+    "data": [
+      {
+        "mac": "aa:bb:cc:00:20:80",
+        "ip": "192.168.20.80",
+        "hostname": "phone",
+        "essid": "HomeWifi",
+        "network": "IoT",
+        "vlan": 20,
+        "oui": "Apple"
+      },
+      {
+        "mac": "aa:bb:cc:00:00:10",
+        "ip": "192.168.1.10",
+        "hostname": "nas",
+        "is_wired": true,
+        "network": "LAN"
+      },
+      {
+        "mac": "aa:bb:cc:00:20:83",
+        "hostname": "no-ip-client"
+      }
+    ]
+  },
+  "GET /proxy/network/api/s/default/rest/user": {
+    "meta": {
+      "rc": "ok"
+    },
+    "data": [
+      {
+        "mac": "aa:bb:cc:00:20:81",
+        "fixed_ip": "192.168.20.81",
+        "name": "tv",
+        "use_fixedip": true,
+        "note": "living room"
+      },
+      {
+        "mac": "aa:bb:cc:00:20:82",
+        "last_ip": "192.168.20.82"
+      }
+    ]
+  },
+  "GET /proxy/network/api/s/default/stat/device": {
+    "meta": {
+      "rc": "ok"
+    },
+    "data": [
+      {
+        "mac": "f4:e2:c6:00:00:02",
+        "ip": "192.168.1.2",
+        "name": "usw-24",
+        "model": "US24",
+        "type": "usw",
+        "version": "7.1.26",
+        "state": 1
+      }
+    ]
+  }
+}

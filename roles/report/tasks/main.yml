@@ -1,0 +1,79 @@
+---
+- name: Validate requested reports
+  ansible.builtin.assert:
+    that: ip_inventory_reports | difference(_ip_inventory_report_catalog.keys() | list) | length == 0
+    fail_msg: >-
+      Unknown report(s) {{ ip_inventory_reports | difference(_ip_inventory_report_catalog.keys() | list) }}.
+      Available: {{ _ip_inventory_report_catalog.keys() | list }}
+    quiet: true
+
+- name: Fix report timestamp and selection
+  ansible.builtin.set_fact:
+    ip_inventory_generated_at: "{{ now(utc=true).strftime('%Y-%m-%dT%H:%M:%S+00:00') }}"
+    _ip_inventory_report_suffix: "{{ now().strftime('-%Y%m%d-%H%M%S') if ip_inventory_report_timestamped | bool else '' }}"
+    _ip_inventory_report_selected: >-
+      {{ (ip_inventory_reports | map('extract', _ip_inventory_report_catalog) | list) + ip_inventory_report_custom }}
+    _ip_inventory_report_has:
+      subnets: "{{ (ip_inventory_subnets | default([]) | length + ip_inventory_orphan_vlans | default([]) | length) > 0 }}"
+      findings: "{{ ip_inventory_findings | default([]) | length > 0 }}"
+
+# Only create (and set the mode of) the directory when it is missing: an existing shared or
+# mounted directory owned by another user must not be chmod'ed.
+- name: Check output directory
+  ansible.builtin.stat:
+    path: "{{ ip_inventory_output_dir }}"
+  register: _ip_inventory_output_dir_stat
+
+- name: Create output directory
+  ansible.builtin.file:
+    path: "{{ ip_inventory_output_dir }}"
+    state: directory
+    mode: "0755"
+  when: not _ip_inventory_output_dir_stat.stat.exists
+
+- name: Render reports
+  ansible.builtin.template:
+    src: "{{ item.template }}"
+    dest: "{{ ip_inventory_output_dir }}/{{ item.basename }}{{ _ip_inventory_report_suffix }}.{{ item.ext }}"
+    mode: "0644"
+    newline_sequence: "{{ item.newline | default('\n') }}"
+  loop: "{{ _ip_inventory_report_selected }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.requires is not defined or _ip_inventory_report_has[item.requires] | bool
+  register: _ip_inventory_report_written
+
+- name: Record written report paths
+  ansible.builtin.set_fact:
+    ip_inventory_report_files: >-
+      {{ _ip_inventory_report_written.results | rejectattr('skipped', 'defined')
+         | map(attribute='dest') | list }}
+
+- name: Show run summary
+  ansible.builtin.debug:
+    msg: "{{ lookup('ansible.builtin.template', 'summary.txt.j2').splitlines() }}"
+  when: ip_inventory_report_print_summary | bool
+
+- name: Build compact run summary
+  ansible.builtin.set_fact:
+    ip_inventory_summary: >-
+      {{ {
+           'generated_at': ip_inventory_generated_at,
+           'hosts': ip_inventory_hosts | length,
+           'ping_up': ip_inventory_hosts | selectattr('ping_status', 'equalto', 'up') | list | length,
+           'ping_down': ip_inventory_hosts | selectattr('ping_status', 'equalto', 'down') | list | length,
+           'discovered': ip_inventory_discovered | default([]) | length,
+           'subnets': ip_inventory_subnets | default([]) | length,
+           'sources': ip_inventory_source_stats | default({}),
+           'issues': _ip_inventory_issues | dict2items | rejectattr('key', 'in', ['descriptions', 'severities']) | items2dict,
+           'report_files': ip_inventory_report_files,
+         } }}
+  vars:
+    _ip_inventory_issues: "{{ ip_inventory_findings | default([]) | lennysh.ip_inventory.issue_summary }}"
+
+- name: Publish run summary as job artifacts (AAP job details / workflow nodes)
+  ansible.builtin.set_stats:
+    data:
+      ip_inventory_summary: "{{ ip_inventory_summary }}"
+    per_host: false
+  when: ip_inventory_report_set_stats | bool

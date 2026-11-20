@@ -1,0 +1,21 @@
+---
+- name: Collect observations from OPNsense
+  lennysh.ip_inventory.opnsense_info:
+    url: "{{ ip_inventory_opnsense_url | default(omit, true) }}"
+    api_key: "{{ ip_inventory_opnsense_api_key | default(omit, true) }}"
+    api_secret: "{{ ip_inventory_opnsense_api_secret | default(omit, true) }}"
+    validate_certs: "{{ ip_inventory_opnsense_validate_certs }}"
+    timeout: "{{ ip_inventory_opnsense_timeout }}"
+    dhcp_backend: "{{ ip_inventory_opnsense_dhcp_backend }}"
+    collect: "{{ ip_inventory_opnsense_collect }}"
+  register: _ip_inventory_opnsense_result
+  ignore_errors: "{{ ip_inventory_ignore_source_errors | default(false) }}"
+
+- name: Filter and add OPNsense observations
+  ansible.builtin.include_role:
+    name: lennysh.ip_inventory.collect_common
+    tasks_from: add.yml
+  vars:
+    collect_common_source: opnsense
+    collect_common_result: "{{ _ip_inventory_opnsense_result }}"
+    collect_common_filters: "{{ ip_inventory_opnsense_filters }}"

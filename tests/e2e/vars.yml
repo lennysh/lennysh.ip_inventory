@@ -1,0 +1,20 @@
+---
+# Points every source at tests/e2e/mock_api.py. Secrets are dummies.
+ip_inventory_sources: [opnsense, technitium, proxmox, unifi]
+ip_inventory_filters:
+  include_networks: ["192.168.*"]
+  exclude_networks: ["127.*", "172.17.*"]
+  exclude_interfaces: [lo0, wan]
+  exclude_name_patterns: ["*docker*"]
+ip_inventory_opnsense_url: http://127.0.0.1:8765
+ip_inventory_opnsense_api_key: dummy-key
+ip_inventory_opnsense_api_secret: dummy-secret
+ip_inventory_technitium_url: http://127.0.0.1:8765
+ip_inventory_technitium_token: dummy-token
+ip_inventory_proxmox_url: http://127.0.0.1:8765
+ip_inventory_proxmox_token_id: inventory@pam!e2e
+ip_inventory_proxmox_token_secret: dummy-uuid
+ip_inventory_unifi_url: http://127.0.0.1:8765
+ip_inventory_unifi_api_key: dummy-unifi
+# Fixture IPs are not real hosts; skip ICMP by default in the e2e run.
+ip_inventory_ping_enabled: false

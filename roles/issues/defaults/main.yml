@@ -1,0 +1,9 @@
+---
+ip_inventory_issues_enabled: true
+# Only run these checks (empty = all): mac_shared, mac_conflict, hostname_shared, dns_only,
+# dns_unreachable, active_unreachable, missing_mac, discovered, cname_aliases
+ip_inventory_issues_checks: []
+ip_inventory_issues_skip_checks: []
+ip_inventory_issues_cname_alias_threshold: 10
+# Fail the play when findings of these severities exist, e.g. [high]. Handy in CI / AAP schedules.
+ip_inventory_issues_fail_on: []

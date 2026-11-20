@@ -1,0 +1,145 @@
+{
+  "GET /api/interfaces/overview/interfaces_info": {
+    "rows": [
+      {
+        "identifier": "lan",
+        "device": "igb0",
+        "description": "LAN",
+        "status": "up",
+        "ipv4": [
+          {
+            "ipaddr": "192.168.1.1/24"
+          }
+        ]
+      },
+      {
+        "identifier": "opt1",
+        "device": "igb1_vlan20",
+        "description": "IoT",
+        "status": "up",
+        "vlan_tag": "20",
+        "ipv4": [
+          {
+            "ipaddr": "192.168.20.1/24"
+          }
+        ]
+      },
+      {
+        "identifier": "opt2",
+        "device": "igb1_vlan30",
+        "description": "Lab",
+        "status": "up",
+        "vlan": {
+          "tag": 30
+        },
+        "addr4": "192.168.30.1/24"
+      },
+      {
+        "identifier": "wan",
+        "device": "igb2",
+        "description": "WAN",
+        "status": "up",
+        "ipv4": [
+          {
+            "ipaddr": "203.0.113.2/30"
+          }
+        ]
+      },
+      {
+        "identifier": "lo0",
+        "device": "lo0",
+        "description": "Loopback",
+        "status": "up",
+        "ipv4": [
+          {
+            "ipaddr": "127.0.0.1/8"
+          }
+        ]
+      }
+    ]
+  },
+  "POST /api/interfaces/vlan_settings/search_item": {
+    "rows": [
+      {
+        "uuid": "v20",
+        "tag": "20",
+        "if": "igb1",
+        "descr": "IoT"
+      },
+      {
+        "uuid": "v30",
+        "tag": "30",
+        "if": "igb1",
+        "descr": "Lab"
+      },
+      {
+        "uuid": "v99",
+        "tag": "99",
+        "if": "igb1",
+        "descr": "Spare"
+      }
+    ]
+  },
+  "GET /api/diagnostics/interface/get_arp": [
+    {
+      "ip": "192.168.1.1",
+      "mac": "00:0d:b9:00:00:01",
+      "intf": "igb0",
+      "hostname": "",
+      "permanent": true
+    },
+    {
+      "ip": "192.168.20.1",
+      "mac": "00:0d:b9:00:00:01",
+      "intf": "igb1_vlan20",
+      "permanent": true
+    },
+    {
+      "ip": "192.168.30.1",
+      "mac": "00:0d:b9:00:00:01",
+      "intf": "igb1_vlan30",
+      "permanent": true
+    },
+    {
+      "ip": "192.168.1.10",
+      "mac": "aa:bb:cc:00:00:10",
+      "intf": "igb0",
+      "hostname": "nas.lab.example",
+      "expires": 1200
+    },
+    {
+      "ip": "192.168.1.20",
+      "mac": "aa:bb:cc:00:00:20",
+      "intf": "igb0",
+      "expires": 900
+    },
+    {
+      "ip": "192.168.1.21",
+      "mac": "AA-BB-CC-00-00-20",
+      "intf": "igb0",
+      "expires": 900
+    },
+    {
+      "ip": "192.168.20.50",
+      "mac": "AA-BB-CC-00-00-50",
+      "intf": "igb1_vlan20",
+      "expires": 600
+    },
+    {
+      "ip": "192.168.30.15",
+      "mac": "aa:bb:cc:00:30:15",
+      "intf": "igb1_vlan30",
+      "hostname": "docker-runner",
+      "expires": 600
+    },
+    {
+      "ip": "172.17.0.2",
+      "mac": "02:42:ac:11:00:02",
+      "intf": "docker0"
+    },
+    {
+      "ip": "not-an-ip",
+      "mac": "x"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+---
+DOCUMENTATION:
+  name: sweep_candidates
+  short_description: Unused addresses to sweep in collected subnets
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Lists host addresses inside the subnets that are not already known, skipping the gateway, /31-/32, public networks (optionally)
+      and oversized subnets.
+  options:
+    _input:
+      description: Subnet records (from reconcile).
+      type: list
+      required: true
+      elements: dict
+    hosts:
+      description: Known host records.
+      type: list
+      required: true
+      elements: dict
+    max_hosts_per_subnet:
+      description: Skip subnets with more usable hosts than this.
+      type: int
+      required: false
+      default: 512
+    private_only:
+      description: Only sweep private/link-local networks.
+      type: bool
+      required: false
+      default: true
+    filters:
+      description: Optional global rules applied to the subnets.
+      type: dict
+      required: false
+    source_filters:
+      description: Optional per-source rules applied to the subnets.
+      type: dict
+      required: false
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      candidates: "{{ subnets | lennysh.ip_inventory.sweep_candidates(hosts) }}"
+
+RETURN:
+  _value:
+    description: List of dicts with C(ip) and C(cidr).
+    type: list
+    elements: dict

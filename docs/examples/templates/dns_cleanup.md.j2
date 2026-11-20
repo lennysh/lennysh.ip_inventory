@@ -1,0 +1,10 @@
+{#- Example custom report: DNS names that look stale. All ip_inventory_* facts are available. -#}
+# DNS cleanup candidates ({{ ip_inventory_generated_at }})
+
+| IP | Names | Why |
+|----|-------|-----|
+{% for h in ip_inventory_hosts if h.metadata.dns_names | default([]) %}
+{% if h.metadata.dns_only | default(false) or h.ping_status == 'down' %}
+| `{{ h.ip }}` | {{ h.metadata.dns_names | join(', ') }} | {{ 'DNS-only' if h.metadata.dns_only else 'ping down' }} |
+{% endif %}
+{% endfor %}

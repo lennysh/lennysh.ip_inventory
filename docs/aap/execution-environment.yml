@@ -1,0 +1,27 @@
+---
+# ansible-builder definition for an execution environment that can run lennysh.ip_inventory.
+#   ansible-builder build -t <registry>/ip-inventory-ee:1.0.0
+#   podman push <registry>/ip-inventory-ee:1.0.0
+#
+# The collection declares its system dependency (iputils, for ping) in meta/execution-environment.yml
+# + bindep.txt, so ansible-builder installs it automatically. None of the stock ee-minimal /
+# ee-supported images ship a ping binary.
+version: 3
+
+images:
+  base_image:
+    # ansible-core 2.16 (AAP 2.4-2.7 default). On AAP 2.7 you can use ee-minimal-rhel9:2.20 instead.
+    name: registry.redhat.io/ansible-automation-platform-27/ee-minimal-rhel9:2.16
+
+dependencies:
+  galaxy:
+    collections:
+      # Pin a tag or commit for reproducible images.
+      - name: https://github.com/lennysh/lennysh-ip_inventory-collection.git
+        type: git
+        version: main
+      # Only needed for the email delivery example (community.general.mail).
+      - name: community.general
+
+options:
+  package_manager_path: /usr/bin/microdnf

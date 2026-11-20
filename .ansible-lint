@@ -1,0 +1,13 @@
+---
+profile: production
+exclude_paths:
+  - homelab/
+  - tests/output/
+  - .github/
+skip_list:
+  # The roles intentionally share one variable namespace (ip_inventory_*) so data flows
+  # between collect_* -> reconcile -> reachability -> issues -> report as plain facts.
+  - var-naming[no-role-prefix]
+# Used only by the report-delivery example playbooks (docs/), not by the collection itself.
+mock_modules:
+  - community.general.mail

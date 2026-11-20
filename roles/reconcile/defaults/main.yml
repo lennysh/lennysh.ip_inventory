@@ -1,0 +1,3 @@
+---
+# Skip merging: keep every raw observation as its own row (useful for debugging a source).
+ip_inventory_raw: false

@@ -1,0 +1,11 @@
+---
+# OPNsense connection. Secrets should come from Ansible Vault (or the env vars noted in
+# meta/argument_specs.yml); empty values are omitted so the module's env fallbacks apply.
+ip_inventory_opnsense_url: ""
+ip_inventory_opnsense_api_key: ""
+ip_inventory_opnsense_api_secret: ""
+ip_inventory_opnsense_validate_certs: false
+ip_inventory_opnsense_timeout: 30
+ip_inventory_opnsense_dhcp_backend: auto
+ip_inventory_opnsense_collect: {}
+ip_inventory_opnsense_filters: {}

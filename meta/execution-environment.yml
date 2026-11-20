@@ -1,0 +1,5 @@
+---
+# Read by ansible-builder when this collection is part of an execution environment build.
+version: 1
+dependencies:
+  system: bindep.txt

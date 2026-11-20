@@ -1,0 +1,21 @@
+---
+# Sources to collect, in order. Short names map to lennysh.ip_inventory.collect_<name>;
+# a fully-qualified role name (e.g. my_ns.my_col.collect_netbox) is used as-is, which is
+# how you plug in your own collectors.
+ip_inventory_sources:
+  - opnsense
+  - technitium
+  - proxmox
+
+# Global include/exclude rules applied to every source (see README "Filters").
+ip_inventory_filters: {}
+
+# Keep going when a source fails (it is reported in the summary) instead of failing the play.
+ip_inventory_ignore_source_errors: false
+
+# Skip merging: report every raw observation (useful for debugging a source). Disables sweep and issues.
+ip_inventory_raw: false
+
+# Toggle whole stages.
+ip_inventory_reachability_enabled: true
+ip_inventory_report_enabled: true

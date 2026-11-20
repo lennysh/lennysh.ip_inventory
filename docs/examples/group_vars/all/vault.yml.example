@@ -1,0 +1,7 @@
+---
+# Copy to vault.yml and encrypt:  ansible-vault encrypt group_vars/all/vault.yml
+vault_opnsense_api_key: CHANGEME
+vault_opnsense_api_secret: CHANGEME
+vault_technitium_token: CHANGEME
+vault_proxmox_token_secret: CHANGEME
+vault_unifi_api_key: CHANGEME

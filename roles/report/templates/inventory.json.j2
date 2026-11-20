@@ -1,0 +1,3 @@
+{{ {'generated_at': ip_inventory_generated_at,
+    'count': ip_inventory_hosts | length,
+    'records': ip_inventory_hosts} | to_nice_json(indent=2) }}

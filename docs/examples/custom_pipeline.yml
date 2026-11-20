@@ -1,0 +1,37 @@
+---
+# Run the stages yourself and plug in custom steps / reports.
+- name: Custom IP inventory pipeline
+  hosts: localhost
+  gather_facts: false
+  vars:
+    ip_inventory_observations: []
+    ip_inventory_report_custom:
+      - name: dns_cleanup
+        template: templates/dns_cleanup.md.j2
+        basename: dns-cleanup
+        ext: md
+  tasks:
+    - name: Collect from Technitium and OPNsense only
+      ansible.builtin.include_role:
+        name: "lennysh.ip_inventory.collect_{{ item }}"
+      loop: [technitium, opnsense]
+
+    # Any module that returns records in the common schema can be added here,
+    # e.g. a static list of devices you know about but no API reports.
+    - name: Add hand-maintained records
+      ansible.builtin.set_fact:
+        ip_inventory_observations: "{{ ip_inventory_observations + static_records }}"
+      vars:
+        static_records:
+          - {ip: 192.168.1.250, hostname: ups.lab.example, source: manual, record_type: static, metadata: {}}
+
+    - name: Reconcile, ping, analyze
+      ansible.builtin.include_role:
+        name: "lennysh.ip_inventory.{{ item }}"
+      loop: [reconcile, reachability, issues]
+
+    - name: Only write the CSV and the custom report
+      ansible.builtin.include_role:
+        name: lennysh.ip_inventory.report
+      vars:
+        ip_inventory_reports: [inventory_csv]

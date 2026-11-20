@@ -1,0 +1,46 @@
+---
+# Non-secret settings for the job template. Secrets are NOT set here: leaving
+# ip_inventory_<source>_api_key & co. unset makes the modules read the environment variables
+# injected by the "IP Inventory Sources" credential.
+
+ip_inventory_sources: [opnsense, technitium, proxmox, unifi]
+
+ip_inventory_filters:
+  include_networks: [192.168.*]
+  exclude_networks: [127.*, 172.17.*]
+
+ip_inventory_opnsense_url: https://opnsense.example.com
+ip_inventory_opnsense_validate_certs: false
+ip_inventory_opnsense_filters:
+  exclude_interfaces: [lo0, wan]
+
+ip_inventory_technitium_url: https://technitium.example.com
+
+ip_inventory_proxmox_url: https://proxmox.example.com:8006
+ip_inventory_proxmox_validate_certs: false
+ip_inventory_proxmox_filters:
+  exclude_name_patterns: ["*docker*", "*podman*"]
+
+ip_inventory_unifi_url: https://unifi.example.com
+ip_inventory_unifi_validate_certs: false
+ip_inventory_unifi_collect:
+  known_clients: false
+
+ip_inventory_ping_enabled: true
+ip_inventory_discover_unknown: true
+
+# Keep going (and report it) when one source is down.
+ip_inventory_ignore_source_errors: true
+
+# Fail the job (useful for notifications) on high-severity findings.
+# ip_inventory_issues_fail_on: [high]
+
+# Report delivery (done by ip_inventory.yml, not the collection). Leave a target empty to skip it.
+# The web server needs SSH access: attach a Machine credential to the job template.
+report_web_host: ""                        # e.g. web01.example.com
+report_web_root: /var/www/html/ip-inventory
+report_web_become: true
+report_mail_to: ""                         # e.g. you@example.com
+report_mail_from: ip-inventory@example.com
+report_smtp_host: smtp.example.com
+report_smtp_port: 25

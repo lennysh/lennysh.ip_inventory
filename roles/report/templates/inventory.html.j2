@@ -1,0 +1,134 @@
+{#- Self-contained HTML report: summary, issues, hosts and subnets with a live filter box. -#}
+{% set hosts = ip_inventory_hosts | default([]) %}
+{% set findings = ip_inventory_findings | default([]) %}
+{% set issues = findings | lennysh.ip_inventory.issue_summary %}
+{% set issue_map = findings | lennysh.ip_inventory.issues_by_ip %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>IP Inventory {{ ip_inventory_generated_at | e }}</title>
+<style>
+  :root { --bg: #fff; --fg: #1f2328; --muted: #656d76; --line: #d0d7de; --head: #f6f8fa;
+          --high: #cf222e; --medium: #9a6700; --low: #0969da; --info: #656d76; --up: #1a7f37; --down: #cf222e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #8d96a0; --line: #30363d; --head: #161b22;
+            --high: #ff7b72; --medium: #d29922; --low: #58a6ff; --info: #8d96a0; --up: #3fb950; --down: #ff7b72; }
+  }
+  body { font: 14px/1.45 system-ui, sans-serif; margin: 1.5rem; background: var(--bg); color: var(--fg); }
+  h1 { margin: 0 0 .25rem; } .muted { color: var(--muted); }
+  .cards { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0; }
+  .card { border: 1px solid var(--line); border-radius: 6px; padding: .5rem .9rem; min-width: 7rem; }
+  .card b { display: block; font-size: 1.4rem; }
+  table { border-collapse: collapse; width: 100%; margin: .5rem 0 1.5rem; }
+  th, td { border-bottom: 1px solid var(--line); padding: .3rem .5rem; text-align: left; vertical-align: top; }
+  th { background: var(--head); position: sticky; top: 0; cursor: pointer; user-select: none; }
+  td.mono, .mono { font-family: ui-monospace, monospace; font-size: 12.5px; }
+  .sev-high { color: var(--high); font-weight: 600; } .sev-medium { color: var(--medium); font-weight: 600; }
+  .sev-low { color: var(--low); } .sev-info { color: var(--info); }
+  .up { color: var(--up); } .down { color: var(--down); }
+  .tag { display: inline-block; border: 1px solid var(--line); border-radius: 10px; padding: 0 .4rem; margin: 0 .15rem .15rem 0; font-size: 12px; }
+  input[type=search] { width: 22rem; max-width: 100%; padding: .35rem .5rem; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); }
+</style>
+</head>
+<body>
+<h1>IP Inventory</h1>
+<div class="muted">Generated {{ ip_inventory_generated_at | e }}</div>
+
+<div class="cards">
+  <div class="card"><b>{{ hosts | length }}</b>rows</div>
+  <div class="card"><b class="up">{{ hosts | selectattr('ping_status', 'equalto', 'up') | list | length }}</b>ping up</div>
+  <div class="card"><b class="down">{{ hosts | selectattr('ping_status', 'equalto', 'down') | list | length }}</b>ping down</div>
+  <div class="card"><b>{{ ip_inventory_subnets | default([]) | length }}</b>subnets</div>
+{% for sev in issues.severities %}
+  <div class="card"><b class="sev-{{ sev }}">{{ issues.by_severity[sev] | default(0) }}</b>{{ sev }} issues</div>
+{% endfor %}
+</div>
+
+<p class="muted">Sources:
+{% for name, s in (ip_inventory_source_stats | default({})).items() %}
+  <span class="tag">{{ name | e }}: {{ s.kept }}/{{ s.collected }}{{ ' FAILED' if s.failed else '' }}</span>
+{% endfor %}
+</p>
+
+<p><input type="search" id="q" placeholder="Filter all tables (IP, name, MAC, VLAN, issue...)" autofocus></p>
+
+{% if findings %}
+<h2>Issues ({{ findings | length }})</h2>
+<table class="filterable sortable">
+  <thead><tr><th>Severity</th><th>Category</th><th>Summary</th><th>IPs</th><th>Evidence</th></tr></thead>
+  <tbody>
+{% for f in findings %}
+    <tr><td class="sev-{{ f.severity }}">{{ f.severity }}</td><td>{{ f.category | e }}</td>
+        <td title="{{ f.detail | e }}">{{ f.summary | e }}</td>
+        <td class="mono">{{ f.ips[:8] | join(', ') | e }}{{ ' …' if f.ips | length > 8 else '' }}</td>
+        <td>{{ f.evidence | e }}</td></tr>
+{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<h2>Hosts</h2>
+<table class="filterable sortable">
+  <thead><tr><th>IP</th><th>Hostname</th><th>MAC</th><th>VLAN</th><th>Subnet</th><th>Sources</th><th>Types</th><th>Ping</th><th>Issues</th><th>Notes</th></tr></thead>
+  <tbody>
+{% for r in hosts %}
+{% set m = r.metadata | default({}) %}
+    <tr>
+      <td class="mono">{{ r.ip | e }}</td>
+      <td>{{ (r.hostname or '') | e }}{% for alias in m.cname_aliases | default([]) %}<br><span class="muted">↳ {{ alias | e }}</span>{% endfor %}</td>
+      <td class="mono">{{ (m.all_macs | default([r.mac] if r.mac else [])) | map('e') | join('<br>') }}</td>
+      <td>{{ (m.vlan_name | default('') or '') | e }}{{ ' (' ~ r.vlan ~ ')' if r.vlan else '' }}</td>
+      <td class="mono">{{ (m.subnet | default('') or '') | e }}</td>
+      <td>{{ (m.all_sources | default([r.source])) | join(', ') | e }}</td>
+      <td>{{ (m.all_record_types | default([r.record_type])) | join(', ') | e }}</td>
+      <td class="{{ r.ping_status or '' }}">{{ r.ping_status or '-' }}</td>
+      <td>{% for c in issue_map[r.ip] | default([]) %}<span class="tag">{{ c }}</span>{% endfor %}</td>
+      <td>{{ (r.notes or '') | e }}</td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+
+{% if ip_inventory_subnets | default([]) or ip_inventory_orphan_vlans | default([]) %}
+<h2>Subnets</h2>
+<table class="filterable sortable">
+  <thead><tr><th>Interface</th><th>Description</th><th>VLAN</th><th>VLAN name</th><th>Gateway</th><th>CIDR</th><th>Hosts in inventory</th></tr></thead>
+  <tbody>
+{% for s in ip_inventory_subnets | default([]) %}
+{% set m = s.metadata | default({}) %}
+    <tr><td>{{ (s.hostname or '') | e }}</td><td>{{ (s.notes or '') | e }}</td><td>{{ s.vlan or '' }}</td>
+        <td>{{ (m.vlan_name | default('') or '') | e }}</td><td class="mono">{{ s.ip }}</td><td class="mono">{{ m.cidr | default('') }}</td>
+        <td>{{ hosts | selectattr('metadata.subnet', 'defined') | selectattr('metadata.subnet', 'equalto', m.cidr | default('')) | list | length }} / {{ m.total_hosts | default('') }}</td></tr>
+{% endfor %}
+{% for v in ip_inventory_orphan_vlans | default([]) %}
+    <tr><td class="muted">(none)</td><td>{{ (v.notes or '') | e }}</td><td>{{ v.vlan or '' }}</td><td>{{ (v.hostname or '') | e }}</td><td></td><td></td><td></td></tr>
+{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+<script>
+document.getElementById('q').addEventListener('input', function (e) {
+  var q = e.target.value.toLowerCase();
+  document.querySelectorAll('table.filterable tbody tr').forEach(function (tr) {
+    tr.style.display = tr.textContent.toLowerCase().indexOf(q) === -1 ? 'none' : '';
+  });
+});
+function ipKey(s) {
+  var m = s.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)/);
+  return m ? m.slice(1).map(function (o) { return ('00' + o).slice(-3); }).join('.') : s.toLowerCase();
+}
+document.querySelectorAll('table.sortable th').forEach(function (th, idx) {
+  th.addEventListener('click', function () {
+    var tbody = th.closest('table').querySelector('tbody');
+    var asc = th.dataset.asc !== 'true'; th.dataset.asc = asc;
+    Array.from(tbody.rows).sort(function (a, b) {
+      var x = ipKey(a.cells[idx].textContent.trim()), y = ipKey(b.cells[idx].textContent.trim());
+      return (x > y ? 1 : x < y ? -1 : 0) * (asc ? 1 : -1);
+    }).forEach(function (tr) { tbody.appendChild(tr); });
+  });
+});
+</script>
+</body>
+</html>

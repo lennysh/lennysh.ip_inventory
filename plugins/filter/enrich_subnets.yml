@@ -1,0 +1,25 @@
+---
+DOCUMENTATION:
+  name: enrich_subnets
+  short_description: Select and enrich subnet records
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Returns the C(subnet) records with netmask, prefix_length, broadcast and total_hosts added.
+  options:
+    _input:
+      description: Records (any type).
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      subnets: "{{ raw | lennysh.ip_inventory.enrich_subnets }}"
+
+RETURN:
+  _value:
+    description: Enriched subnet records.
+    type: list
+    elements: dict

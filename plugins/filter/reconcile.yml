@@ -1,0 +1,25 @@
+---
+DOCUMENTATION:
+  name: reconcile
+  short_description: Merge observations into one row per IP
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Groups host observations by IP, picks a primary hostname/MAC, folds VLAN definitions into subnets and enriches hosts
+      with subnet/VLAN data.
+  options:
+    _input:
+      description: Filtered observation records from one or more collectors.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      merged: "{{ ip_inventory_observations | lennysh.ip_inventory.reconcile }}"
+
+RETURN:
+  _value:
+    description: Dict with keys C(hosts), C(subnets) and C(orphan_vlans).
+    type: dict

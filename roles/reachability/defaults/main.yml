@@ -1,0 +1,10 @@
+---
+# Ping every known host IP.
+ip_inventory_ping_enabled: true
+ip_inventory_ping_timeout: 1.0
+ip_inventory_ping_concurrency: 50
+
+# Sweep unused addresses in collected subnets for responders no source knows about.
+ip_inventory_discover_unknown: false
+ip_inventory_discover_private_only: true
+ip_inventory_discover_max_hosts_per_subnet: 512

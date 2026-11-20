@@ -1,0 +1,25 @@
+---
+DOCUMENTATION:
+  name: pingable_ips
+  short_description: Unique IPs worth pinging
+  version_added: 1.0.0
+  author: Lenny Shirley (@lennysh)
+  description:
+    - Returns sorted unique IPs of records that are not subnet or VLAN definitions.
+  options:
+    _input:
+      description: Records.
+      type: list
+      required: true
+      elements: dict
+
+EXAMPLES: |
+  - name: Example
+    ansible.builtin.set_fact:
+      targets: "{{ hosts | lennysh.ip_inventory.pingable_ips }}"
+
+RETURN:
+  _value:
+    description: IP address strings.
+    type: list
+    elements: str
