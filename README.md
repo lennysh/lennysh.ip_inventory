@@ -1,5 +1,7 @@
 # Ansible Collection - lennysh.ip_inventory
 
+[![CI](https://github.com/lennysh/lennysh.ip_inventory/actions/workflows/tests.yml/badge.svg?branch=devel)](https://github.com/lennysh/lennysh.ip_inventory/actions/workflows/tests.yml) [![Ansible Galaxy](https://img.shields.io/badge/galaxy-lennysh.ip__inventory-blue.svg?logo=ansible)](https://galaxy.ansible.com/ui/repo/published/lennysh/ip_inventory/) [![GitHub release](https://img.shields.io/github/v/release/lennysh/lennysh.ip_inventory?sort=semver)](https://github.com/lennysh/lennysh.ip_inventory/releases) [![ansible-core](https://img.shields.io/badge/ansible--core-%3E%3D2.16-blue.svg)](https://github.com/lennysh/lennysh.ip_inventory/blob/devel/meta/runtime.yml) [![GitHub license](https://img.shields.io/github/license/lennysh/lennysh.ip_inventory.svg)](https://github.com/lennysh/lennysh.ip_inventory/blob/devel/LICENSE) [![GitHub last commit](https://img.shields.io/github/last-commit/lennysh/lennysh.ip_inventory/devel.svg)](https://github.com/lennysh/lennysh.ip_inventory/commits/devel) [![GitHub issues](https://img.shields.io/github/issues/lennysh/lennysh.ip_inventory.svg)](https://github.com/lennysh/lennysh.ip_inventory/issues) [![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/lennysh/lennysh.ip_inventory/blob/devel/.github/CONTRIBUTING.md)
+
 Pull hostname and IP data from **OPNsense**, **Technitium DNS**, **Proxmox VE** and **UniFi Network**,
 merge it into one row per IP, ping everything, flag anomalies, and write reports from Jinja2 templates.
 The same data is also available as a **dynamic inventory**, grouped by subnet, VLAN, source, issue, and so on.
@@ -40,7 +42,7 @@ Every plugin has full `ansible-doc` documentation (`ansible-doc -t filter lennys
 ## Install
 
 ```bash
-ansible-galaxy collection install git+https://github.com/lennysh/lennysh-ip_inventory-collection.git
+ansible-galaxy collection install git+https://github.com/lennysh/lennysh.ip_inventory.git
 # or, from a checkout:
 ansible-galaxy collection build && ansible-galaxy collection install lennysh-ip_inventory-*.tar.gz
 ```

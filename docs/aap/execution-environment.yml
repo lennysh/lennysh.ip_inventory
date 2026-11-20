@@ -16,10 +16,10 @@ images:
 dependencies:
   galaxy:
     collections:
-      # Pin a tag or commit for reproducible images.
-      - name: https://github.com/lennysh/lennysh-ip_inventory-collection.git
+      # Pin a release tag (e.g. 1.0.0) or commit for reproducible images.
+      - name: https://github.com/lennysh/lennysh.ip_inventory.git
         type: git
-        version: main
+        version: devel
       # Only needed for the email delivery example (community.general.mail).
       - name: community.general
 

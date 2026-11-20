@@ -26,7 +26,7 @@ permissions:
 env:
   COLLECTION_NAMESPACE: lennysh
   COLLECTION_NAME: ip_inventory
-  COLLECTION_REPO: https://github.com/lennysh/lennysh-ip_inventory-collection/
+  COLLECTION_REPO: https://github.com/lennysh/lennysh.ip_inventory/
 
 jobs:
   major_release_gate:

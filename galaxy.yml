@@ -18,10 +18,10 @@ tags:
   - proxmox
   - homelab
 dependencies: {}
-repository: https://github.com/lennysh/lennysh-ip_inventory-collection
-documentation: https://github.com/lennysh/lennysh-ip_inventory-collection/blob/main/README.md
-homepage: https://github.com/lennysh/lennysh-ip_inventory-collection
-issues: https://github.com/lennysh/lennysh-ip_inventory-collection/issues
+repository: https://github.com/lennysh/lennysh.ip_inventory
+documentation: https://github.com/lennysh/lennysh.ip_inventory/blob/devel/README.md
+homepage: https://github.com/lennysh/lennysh.ip_inventory
+issues: https://github.com/lennysh/lennysh.ip_inventory/issues
 build_ignore:
   - homelab
   - .github

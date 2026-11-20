@@ -2,7 +2,7 @@
 # Installed by AAP when the project syncs ("Enable Collection(s) Download" must be on, the default).
 # Remove this file if the collection is baked into your execution environment instead.
 collections:
-  - name: https://github.com/lennysh/lennysh-ip_inventory-collection.git
+  - name: https://github.com/lennysh/lennysh.ip_inventory.git
     type: git
     version: devel
   # Used by the email delivery task in ip_inventory.yml.
