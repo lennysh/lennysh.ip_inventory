@@ -18,7 +18,8 @@ on: # yamllint disable-line rule:truthy
 jobs:
   changelog:
     uses: ansible/ansible-content-actions/.github/workflows/changelog.yaml@main
-    if: github.event_name == 'pull_request'
+    # Dependency bumps from Dependabot don't belong in the release notes.
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
   build-import:
     uses: ansible/ansible-content-actions/.github/workflows/build_import.yaml@main
   markdown-link-check:
@@ -31,7 +32,8 @@ jobs:
           use-verbose-mode: 'yes'
           check-modified-files-only: 'yes'
           config-file: '.mlc_config.json'
-          base-branch: ${{ github.base_ref || (github.event_name == 'merge_group' && 'devel') || github.ref_name || 'main' }}
+          base-branch: >-
+            ${{ github.base_ref || (github.event_name == 'merge_group' && 'devel') || github.ref_name || 'main' }}
   ansible-lint:
     uses: ansible/ansible-content-actions/.github/workflows/ansible_lint.yaml@main
   sanity:

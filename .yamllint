@@ -6,8 +6,12 @@ ignore: |
 rules:
   line-length:
     max: 160
+    ignore: |
+      .github/workflows/
   truthy:
     allowed-values: ["true", "false"]
+    ignore: |
+      .github/workflows/
   comments:
     min-spaces-from-content: 1
   comments-indentation: false
